@@ -565,26 +565,26 @@ export function ExperiencesScreen() {
           ease: 'power3.out',
           scrollTrigger: {
             trigger: container,
-            start: 'top 75%',
-            toggleActions: 'play none none reverse',
+            start: 'top 85%',
+            once: true,
           },
         });
       }
 
       // 2. Orbital Cluster Scale & Float-In Reveal Animation
       if (clusterWrapRef.current) {
-        gsap.set(clusterWrapRef.current, { opacity: 0, scale: 0.88, y: 40 });
+        gsap.set(clusterWrapRef.current, { opacity: 0, scale: 0.95, y: 25 });
 
         gsap.to(clusterWrapRef.current, {
           opacity: 1,
           scale: 1,
           y: 0,
-          duration: 1.0,
+          duration: 0.9,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: clusterWrapRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
+            start: 'top 90%',
+            once: true,
           },
         });
       }

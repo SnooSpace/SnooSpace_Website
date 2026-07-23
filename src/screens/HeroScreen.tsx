@@ -20,7 +20,7 @@ const landingScreen2Path = '/phone-recordings/Landing_Screen 2.png';
 const landingScreen1Path = '/phone-recordings/Landing_Screen 1.png';
 
 // Active Video Recording Source
-const videoSrc: string | null = '/phone-recordings/NewLandingScreenRec.mp4';
+const videoSrc: string | null = '/phone-recordings/Welcome.mp4?v=2';
 
 // Custom Crisp Vector SVG Category Icons
 import {
