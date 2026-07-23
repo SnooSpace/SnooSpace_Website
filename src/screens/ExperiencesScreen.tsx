@@ -5,32 +5,39 @@ import Image from 'next/image';
 import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
 import { SnooSpaceDevice } from '@/components/ui/snoospace-device';
-import { Calendar, Users, MapPin, Plus, Sparkles, Star } from 'lucide-react';
+import { HostPlanModal, ACTIVITIES, ActivityOption } from '@/components/ui/host-plan-modal';
+import { Calendar, Users, MapPin, Plus, Sparkles, Star, Globe, Flame } from 'lucide-react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
-interface OrbitItem {
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+interface OrbitNodeItem {
   id: string;
   icon: string;
   label: string;
-  tier: 'Popular' | 'Growing' | 'New' | '';
+  tier: 'Popular' | 'Growing' | 'New' | 'City' | '';
   size: 'lg' | 'md' | 'sm';
   ring: 'inner' | 'mid' | 'outer' | 'center';
   dir: number; // 1 or -1
   phase: number;
   event: string;
   meta: string;
-  attendees: number;
+  illustration: string;
   bg: string;
+  isCity?: boolean;
   create?: boolean;
 }
 
-const ORBIT_ITEMS: OrbitItem[] = [
+const ALL_CLUSTER_NODES: OrbitNodeItem[] = [
   // Central Anchor
   {
     id: 'create',
     icon: '+',
-    label: 'Start an Open Plan',
+    label: 'Host an Open Plan',
     tier: '',
     size: 'lg',
     ring: 'center',
@@ -38,191 +45,446 @@ const ORBIT_ITEMS: OrbitItem[] = [
     phase: 0,
     event: 'Create a mini plan',
     meta: 'Invite people to join in minutes',
-    attendees: 0,
+    illustration: '/illustrations/Other.webp',
     bg: 'bg-[#3565F2]',
     create: true,
   },
-  // Inner Ring (Popular / Established - Larger bubbles, slower orbit)
+
+  // =========================================================
+  // INNER RING (8 Items: Established Categories & Key Cities)
+  // =========================================================
   {
-    id: 'running',
-    icon: '🏃',
-    label: 'Running',
+    id: 'sports',
+    icon: '🏀',
+    label: 'Sports',
     tier: 'Popular',
     size: 'lg',
     ring: 'inner',
     dir: 1,
     phase: 0.0,
-    event: 'Sunset Run Club',
-    meta: 'Riverside Park • Tonight 6:00 PM',
-    attendees: 12,
+    event: 'Pickup Basketball & Drinks',
+    meta: 'Mission Courts • 14 Going',
+    illustration: '/illustrations/Sports.webp',
     bg: 'bg-[#CEF2F2]',
+  },
+  {
+    id: 'city-bengaluru',
+    icon: '🌆',
+    label: 'Bengaluru',
+    tier: 'City',
+    size: 'md',
+    ring: 'inner',
+    dir: -1,
+    phase: 0.8,
+    event: '42 Active Plans Today',
+    meta: 'Indiranagar & Koramangala Hub',
+    illustration: '/illustrations/Community.webp',
+    bg: 'bg-[#F2F7FE]',
+    isCity: true,
+  },
+  {
+    id: 'food',
+    icon: '🍜',
+    label: 'Food',
+    tier: 'Popular',
+    size: 'lg',
+    ring: 'inner',
+    dir: 1,
+    phase: 1.6,
+    event: 'Ramen & Noodle Tasting',
+    meta: 'Japantown • 11 Going',
+    illustration: '/illustrations/Food.webp',
+    bg: 'bg-[#E8EEFF]',
+  },
+  {
+    id: 'cafe',
+    icon: '☕',
+    label: 'Cafe',
+    tier: 'Popular',
+    size: 'lg',
+    ring: 'inner',
+    dir: -1,
+    phase: 2.4,
+    event: 'Specialty Espresso Hangout',
+    meta: 'Third Wave Cafe • Mon 9:30 AM',
+    illustration: '/illustrations/Cafe.webp',
+    bg: 'bg-[#DCE7FF]',
+  },
+  {
+    id: 'city-mumbai',
+    icon: '🏙️',
+    label: 'Mumbai',
+    tier: 'City',
+    size: 'md',
+    ring: 'inner',
+    dir: 1,
+    phase: 3.2,
+    event: '58 Active Plans Today',
+    meta: 'Bandra & Marine Drive Hub',
+    illustration: '/illustrations/People.webp',
+    bg: 'bg-[#CEF2F2]',
+    isCity: true,
   },
   {
     id: 'gaming',
     icon: '🎮',
-    label: 'Gaming',
+    label: 'Games',
     tier: 'Popular',
     size: 'lg',
     ring: 'inner',
     dir: -1,
-    phase: 2.1,
+    phase: 4.0,
     event: 'Smash & Board Games',
     meta: 'The Arcade Bar • Fri 8:00 PM',
-    attendees: 15,
+    illustration: '/illustrations/Gaming.webp',
     bg: 'bg-[#E8EEFF]',
   },
   {
-    id: 'coffee',
-    icon: '☕',
-    label: 'Coffee',
-    tier: 'Popular',
-    size: 'lg',
+    id: 'city-delhi',
+    icon: '🏛️',
+    label: 'Delhi NCR',
+    tier: 'City',
+    size: 'md',
     ring: 'inner',
     dir: 1,
-    phase: 4.2,
-    event: 'Espresso & Coffee Meetup',
-    meta: 'Third Wave Cafe • Mon 9:30 AM',
-    attendees: 9,
+    phase: 4.8,
+    event: '31 Active Plans Today',
+    meta: 'Gurgaon & Hauz Khas Hub',
+    illustration: '/illustrations/Hangout.webp',
     bg: 'bg-[#DCE7FF]',
-  },
-
-  // Mid Ring (Growing - Medium bubbles, medium speed orbit)
-  {
-    id: 'photography',
-    icon: '📷',
-    label: 'Photography',
-    tier: 'Growing',
-    size: 'md',
-    ring: 'mid',
-    dir: 1,
-    phase: 0.8,
-    event: 'Golden Hour Photo Walk',
-    meta: 'Mission District • Wed 5:30 PM',
-    attendees: 8,
-    bg: 'bg-[#E8EEFF]',
-  },
-  {
-    id: 'boardgames',
-    icon: '🎲',
-    label: 'Board Games',
-    tier: 'Growing',
-    size: 'md',
-    ring: 'mid',
-    dir: -1,
-    phase: 2.4,
-    event: 'Strategy & Catan Night',
-    meta: 'Copper Cafe • Thu 7:00 PM',
-    attendees: 10,
-    bg: 'bg-[#CEF2F2]',
-  },
-  {
-    id: 'cycling',
-    icon: '🚴',
-    label: 'Cycling',
-    tier: 'Growing',
-    size: 'md',
-    ring: 'mid',
-    dir: 1,
-    phase: 4.0,
-    event: 'Coastal Trail Loop Ride',
-    meta: 'Harbor Point • Tue 6:45 AM',
-    attendees: 14,
-    bg: 'bg-[#DCE7FF]',
-  },
-  {
-    id: 'yoga',
-    icon: '🧘',
-    label: 'Yoga & Flow',
-    tier: 'Growing',
-    size: 'md',
-    ring: 'mid',
-    dir: -1,
-    phase: 5.2,
-    event: 'Sunrise Park Mindfulness',
-    meta: 'Dolores Park • Sat 8:00 AM',
-    attendees: 18,
-    bg: 'bg-[#F2F7FE]',
-  },
-
-  // Outer Ring (New & Niche - Compact bubbles, faster orbit)
-  {
-    id: 'music',
-    icon: '🎵',
-    label: 'Music & Vinyl',
-    tier: 'New',
-    size: 'sm',
-    ring: 'outer',
-    dir: 1,
-    phase: 0.3,
-    event: 'Open Mic & Record Circle',
-    meta: 'The Loft • Sun 7:00 PM',
-    attendees: 7,
-    bg: 'bg-[#CEF2F2]',
+    isCity: true,
   },
   {
     id: 'movies',
     icon: '🎬',
-    label: 'Indie Cinema',
-    tier: 'New',
-    size: 'sm',
-    ring: 'outer',
+    label: 'Movies',
+    tier: 'Popular',
+    size: 'lg',
+    ring: 'inner',
     dir: -1,
-    phase: 1.5,
-    event: 'Rooftop Film Screening',
-    meta: 'Outdoor Cinema • Sun 9:00 PM',
-    attendees: 16,
-    bg: 'bg-[#E8EEFF]',
+    phase: 5.6,
+    event: 'Indie Film & Rooftop Cinema',
+    meta: 'Rooftop Cinema • Sun 9:00 PM',
+    illustration: '/illustrations/Movie.webp',
+    bg: 'bg-[#F2F7FE]',
   },
+
+  // =========================================================
+  // MID RING (10 Items: Growing Categories & Cities)
+  // =========================================================
   {
-    id: 'books',
-    icon: '📚',
-    label: 'Book Club',
-    tier: 'New',
-    size: 'sm',
-    ring: 'outer',
+    id: 'music',
+    icon: '🎵',
+    label: 'Live Music',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
     dir: 1,
-    phase: 2.8,
-    event: 'Silent Read & Chill',
-    meta: 'Local Library • Sat 3:00 PM',
-    attendees: 11,
-    bg: 'bg-[#DCE7FF]',
-  },
-  {
-    id: 'supper',
-    icon: '🍲',
-    label: 'Supper Club',
-    tier: 'New',
-    size: 'sm',
-    ring: 'outer',
-    dir: -1,
-    phase: 4.1,
-    event: 'Home Cooked Tasting',
-    meta: 'Underground Kitchen • Fri 7:30 PM',
-    attendees: 6,
+    phase: 0.2,
+    event: 'Acoustic Jam & Open Mic',
+    meta: 'The Loft • Sun 7:00 PM',
+    illustration: '/illustrations/Music.webp',
     bg: 'bg-[#CEF2F2]',
   },
   {
-    id: 'pickleball',
-    icon: '🏸',
-    label: 'Pickleball',
+    id: 'gym',
+    icon: '💪',
+    label: 'Gym',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: -1,
+    phase: 0.9,
+    event: 'Morning Workout & Shake',
+    meta: 'Fitness Lab • 8 Going',
+    illustration: '/illustrations/Gym.webp',
+    bg: 'bg-[#E8EEFF]',
+  },
+  {
+    id: 'city-hyderabad',
+    icon: '🏰',
+    label: 'Hyderabad',
+    tier: 'City',
+    size: 'sm',
+    ring: 'mid',
+    dir: 1,
+    phase: 1.5,
+    event: '26 Active Plans Today',
+    meta: 'Jubilee Hills & HITECH Hub',
+    illustration: '/illustrations/Co-work_Study.webp',
+    bg: 'bg-[#F2F7FE]',
+    isCity: true,
+  },
+  {
+    id: 'yoga',
+    icon: '🧘',
+    label: 'Yoga',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: -1,
+    phase: 2.1,
+    event: 'Park Yoga & Mindfulness',
+    meta: 'Dolores Park • Sat 8:00 AM',
+    illustration: '/illustrations/Yoga.webp',
+    bg: 'bg-[#DCE7FF]',
+  },
+  {
+    id: 'walk',
+    icon: '🚶',
+    label: 'Walk',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: 1,
+    phase: 2.8,
+    event: 'Sunset City Stroll',
+    meta: 'Embarcadero • Wed 6:00 PM',
+    illustration: '/illustrations/walk.webp',
+    bg: 'bg-[#CEF2F2]',
+  },
+  {
+    id: 'rides',
+    icon: '🏍️',
+    label: 'Rides',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: -1,
+    phase: 2.49,
+    event: 'Scenic Trail Ride',
+    meta: 'Skyline Boulevard • Sun 7:00 AM',
+    illustration: '/illustrations/ride.webp',
+    bg: 'bg-[#E8EEFF]',
+  },
+  {
+    id: 'city-chennai',
+    icon: '🌊',
+    label: 'Chennai',
+    tier: 'City',
+    size: 'sm',
+    ring: 'mid',
+    dir: 1,
+    phase: 4.2,
+    event: '37 Active Plans Today',
+    meta: 'ECR & Nungambakkam Hub',
+    illustration: '/illustrations/Party.webp',
+    bg: 'bg-[#DCE7FF]',
+    isCity: true,
+  },
+  {
+    id: 'hangout',
+    icon: '🌳',
+    label: 'Hangout',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: -1,
+    phase: 4.8,
+    event: 'Rooftop Chill & Drinks',
+    meta: 'Social Lounge • Fri 6:30 PM',
+    illustration: '/illustrations/Hangout.webp',
+    bg: 'bg-[#F2F7FE]',
+  },
+  {
+    id: 'creative',
+    icon: '🎨',
+    label: 'Creative',
+    tier: 'Growing',
+    size: 'md',
+    ring: 'mid',
+    dir: 1,
+    phase: 5.4,
+    event: 'Pottery & Painting Session',
+    meta: 'Art Studio • Sat 2:00 PM',
+    illustration: '/illustrations/Creative.webp',
+    bg: 'bg-[#CEF2F2]',
+  },
+  {
+    id: 'city-pune',
+    icon: '⛰️',
+    label: 'Pune',
+    tier: 'City',
+    size: 'sm',
+    ring: 'mid',
+    dir: -1,
+    phase: 5.9,
+    event: '29 Active Plans Today',
+    meta: 'Koregaon Park Hub',
+    illustration: '/illustrations/Other.webp',
+    bg: 'bg-[#E8EEFF]',
+    isCity: true,
+  },
+
+  // =========================================================
+  // OUTER RING (11 Items: Niche Categories & Extra Cities)
+  // =========================================================
+  {
+    id: 'study',
+    icon: '📚',
+    label: 'Study / Co-work',
     tier: 'New',
     size: 'sm',
     ring: 'outer',
     dir: 1,
-    phase: 5.4,
-    event: 'Weekend Doubles Social',
-    meta: 'Park Courts • Sat 10:00 AM',
-    attendees: 8,
+    phase: 0.1,
+    event: 'Quiet Focus & Coffee',
+    meta: 'Central Library • Mon 10:00 AM',
+    illustration: '/illustrations/Co-work_Study.webp',
+    bg: 'bg-[#DCE7FF]',
+  },
+  {
+    id: 'pet',
+    icon: '🐾',
+    label: 'Pet Friendly',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: -1,
+    phase: 0.7,
+    event: 'Dog Park Meetup & Walk',
+    meta: 'Duboce Park • Sat 11:00 AM',
+    illustration: '/illustrations/Pet_Friendly.webp',
     bg: 'bg-[#F2F7FE]',
+  },
+  {
+    id: 'houseparty',
+    icon: '🏡',
+    label: 'House Party',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: 1,
+    phase: 1.3,
+    event: 'Games & Snacks House Party',
+    meta: 'Host Home • Sat 8:00 PM',
+    illustration: '/illustrations/HouseParty.webp',
+    bg: 'bg-[#CEF2F2]',
+  },
+  {
+    id: 'club',
+    icon: '🪩',
+    label: 'Club',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: -1,
+    phase: 1.9,
+    event: 'Weekend Dance & DJ Night',
+    meta: 'The Underground • Sat 10:00 PM',
+    illustration: '/illustrations/Party.webp',
+    bg: 'bg-[#E8EEFF]',
+  },
+  {
+    id: 'hiking',
+    icon: '🥾',
+    label: 'Hiking',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: 1,
+    phase: 2.5,
+    event: 'Sunrise Ridge Trail Hike',
+    meta: 'Mount Tamalpais • Sun 6:00 AM',
+    illustration: '/illustrations/Hiking.webp',
+    bg: 'bg-[#DCE7FF]',
+  },
+  {
+    id: 'shopping',
+    icon: '🛍️',
+    label: 'Shopping',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: -1,
+    phase: 3.1,
+    event: 'Shopping Date & Flea Market',
+    meta: 'Orion Mall • Sat 1:00 PM',
+    illustration: '/illustrations/Shopping.webp',
+    bg: 'bg-[#F2F7FE]',
+  },
+  {
+    id: 'community',
+    icon: '👥',
+    label: 'Community',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: 1,
+    phase: 3.7,
+    event: 'New-in-Town Mixer',
+    meta: 'Town Square • Thu 6:00 PM',
+    illustration: '/illustrations/Community.webp',
+    bg: 'bg-[#CEF2F2]',
+  },
+  {
+    id: 'other',
+    icon: '✨',
+    label: 'Other...',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: -1,
+    phase: 4.3,
+    event: 'Spontaneous City Hangout',
+    meta: 'Downtown • Fri 7:00 PM',
+    illustration: '/illustrations/Other.webp',
+    bg: 'bg-[#E8EEFF]',
+  },
+  {
+    id: 'bar',
+    icon: '🍸',
+    label: 'Bar',
+    tier: 'New',
+    size: 'sm',
+    ring: 'outer',
+    dir: 1,
+    phase: 4.9,
+    event: 'Craft Cocktail Social',
+    meta: 'Speakeasy Lounge • Fri 9:00 PM',
+    illustration: '/illustrations/Bar.webp',
+    bg: 'bg-[#DCE7FF]',
+  },
+  {
+    id: 'city-kolkata',
+    icon: '🛺',
+    label: 'Kolkata',
+    tier: 'City',
+    size: 'sm',
+    ring: 'outer',
+    dir: -1,
+    phase: 5.5,
+    event: '22 Active Plans Today',
+    meta: 'Park Street Hub',
+    illustration: '/illustrations/Section 2.webp',
+    bg: 'bg-[#F2F7FE]',
+    isCity: true,
+  },
+  {
+    id: 'city-goa',
+    icon: '🏖️',
+    label: 'Goa',
+    tier: 'City',
+    size: 'sm',
+    ring: 'outer',
+    dir: 1,
+    phase: 6.0,
+    event: '18 Active Plans Today',
+    meta: 'North Goa Beach Hub',
+    illustration: '/illustrations/walk.webp',
+    bg: 'bg-[#CEF2F2]',
+    isCity: true,
   },
 ];
 
-// Elliptical ring parameters (rx/ry percentages & relative speed)
+// Ring Radius Scale Configurations
 const RING_DEFS = {
-  inner: { rxFrac: 0.22, ryFrac: 0.29, speed: 0.08 },
-  mid:   { rxFrac: 0.35, ryFrac: 0.41, speed: 0.12 },
-  outer: { rxFrac: 0.47, ryFrac: 0.46, speed: 0.17 },
+  inner: { rxFrac: 0.32, ryFrac: 0.24, speed: 0.07 },
+  mid:   { rxFrac: 0.42, ryFrac: 0.34, speed: 0.10 },
+  outer: { rxFrac: 0.49, ryFrac: 0.42, speed: 0.13 },
 };
+
+const CITIES = ['San Francisco', 'New York', 'Austin', 'London', 'Tokyo', 'Bengaluru', 'Miami'];
 
 export function ExperiencesScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -232,8 +494,11 @@ export function ExperiencesScreen() {
 
   const [activeBubbleId, setActiveBubbleId] = useState<string | null>(null);
   const [isHoveringCluster, setIsHoveringCluster] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clusterNodes, setClusterNodes] = useState<OrbitNodeItem[]>(ALL_CLUSTER_NODES);
+  const [selectedCity, setSelectedCity] = useState('San Francisco');
 
-  // Viewport IntersectionObserver to pause ticker calculations when offscreen
+  // Viewport Observer
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -251,8 +516,79 @@ export function ExperiencesScreen() {
     return () => observer.unobserve(container);
   }, []);
 
+  const handleClusterMouseLeave = () => {
+    setIsHoveringCluster(false);
+    setActiveBubbleId(null);
+  };
+
+  // Publish New Plan Callback (Item 5)
+  const handlePublishPlan = (newPlan: {
+    activity: ActivityOption;
+    title: string;
+    location: string;
+    spots: number;
+  }) => {
+    const customNode: OrbitNodeItem = {
+      id: `custom-${Date.now()}`,
+      icon: newPlan.activity.emoji,
+      label: newPlan.activity.label,
+      tier: 'Popular',
+      size: 'lg',
+      ring: 'inner',
+      dir: 1,
+      phase: Math.random() * 6,
+      event: newPlan.title,
+      meta: `${newPlan.location} • ${newPlan.spots} spots`,
+      illustration: newPlan.activity.illustration,
+      bg: 'bg-[#CEF2F2]',
+    };
+
+    setClusterNodes((prev) => [prev[0], customNode, ...prev.slice(1)]);
+    setActiveBubbleId(customNode.id);
+  };
+
   useGSAP(
     () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      // 1. Header Line-by-Line ScrollTrigger Reveal Animation
+      const headerElements = container.querySelectorAll('.exp-reveal');
+      if (headerElements.length > 0) {
+        gsap.set(headerElements, { opacity: 0, y: 35 });
+
+        gsap.to(headerElements, {
+          opacity: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: container,
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+      }
+
+      // 2. Orbital Cluster Scale & Float-In Reveal Animation
+      if (clusterWrapRef.current) {
+        gsap.set(clusterWrapRef.current, { opacity: 0, scale: 0.88, y: 40 });
+
+        gsap.to(clusterWrapRef.current, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1.0,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: clusterWrapRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+      }
+
       const wrap = clusterWrapRef.current;
       if (!wrap) return;
 
@@ -271,10 +607,17 @@ export function ExperiencesScreen() {
         rect = wrap.getBoundingClientRect();
         cx = rect.width / 2;
         cy = rect.height / 2;
-        bubbles.forEach((b) => {
-          const size = b.offsetWidth || 140;
-          b.style.left = `${cx - size / 2}px`;
-          b.style.top = `${cy - size / 2}px`;
+        bubbles.forEach((b, i) => {
+          const item = clusterNodes[i];
+          if (item?.create) {
+            b.style.left = '50%';
+            b.style.top = '50%';
+            b.style.transform = 'translate(-50%, -50%)';
+          } else {
+            const size = b.offsetWidth || 120;
+            b.style.left = `${cx - size / 2}px`;
+            b.style.top = `${cy - size / 2}px`;
+          }
         });
       };
 
@@ -284,7 +627,7 @@ export function ExperiencesScreen() {
         updateDimensions();
         orbitStates.forEach((state, i) => {
           if (!state) return;
-          const ring = RING_DEFS[ORBIT_ITEMS[i].ring as keyof typeof RING_DEFS];
+          const ring = RING_DEFS[clusterNodes[i]?.ring as keyof typeof RING_DEFS] || RING_DEFS.mid;
           state.rx = rect.width * ring.rxFrac;
           state.ry = rect.height * ring.ryFrac;
         });
@@ -292,18 +635,18 @@ export function ExperiencesScreen() {
 
       window.addEventListener('resize', handleResize, { passive: true });
 
-      // Central anchor gentle pulse
+      // Central anchor gentle breathing pulse
       if (centerBubbleRef.current) {
         gsap.to(centerBubbleRef.current, {
           scale: 1.05,
-          duration: 2.6,
+          duration: 2.4,
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
         });
         gsap.to(centerBubbleRef.current, {
-          boxShadow: '0 0 0 24px rgba(53,101,242,0), 0 20px 50px -18px rgba(53,101,242,0.5)',
-          duration: 2.6,
+          boxShadow: '0 0 0 24px rgba(53,101,242,0), 0 20px 50px -18px rgba(53,101,242,0.55)',
+          duration: 2.4,
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
@@ -311,9 +654,9 @@ export function ExperiencesScreen() {
       }
 
       // Orbital ticker physics engine
-      const orbitStates = ORBIT_ITEMS.map((item) => {
+      const orbitStates = clusterNodes.map((item) => {
         if (item.create) return null;
-        const ring = RING_DEFS[item.ring as keyof typeof RING_DEFS];
+        const ring = RING_DEFS[item.ring as keyof typeof RING_DEFS] || RING_DEFS.mid;
         return {
           angle: item.phase,
           dir: item.dir,
@@ -325,20 +668,19 @@ export function ExperiencesScreen() {
       });
 
       const updateTicker = (_time: number, deltaMs: number) => {
-        // PERFORMANCE OPTIMIZATION: Skip math & DOM sets if section is offscreen
         if (!isIntersectingRef.current) return;
 
-        const dt = Math.min(deltaMs / 1000, 0.1); // Cap maximum delta time
+        const dt = Math.min(deltaMs / 1000, 0.1);
+
         bubbles.forEach((b, i) => {
-          const item = ORBIT_ITEMS[i];
+          const item = clusterNodes[i];
           const state = orbitStates[i];
-          if (!state || state.paused || item.create) return;
+          if (!state || state.paused || item?.create) return;
 
           state.angle += state.speed * state.dir * dt;
           const x = Math.cos(state.angle) * state.rx;
           const y = Math.sin(state.angle) * state.ry;
 
-          // GPU-accelerated 3D transform assignment
           gsap.set(b, { x, y, force3D: true });
         });
       };
@@ -350,78 +692,125 @@ export function ExperiencesScreen() {
         window.removeEventListener('resize', handleResize);
       };
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [clusterNodes] }
   );
 
   return (
     <section id="experiences" ref={containerRef} className="relative pt-16 pb-28 bg-[#FAFCFF] overflow-hidden">
-      {/* Background Soft Auroras */}
-      <div className="absolute top-0 right-0 w-[580px] h-[580px] rounded-full bg-radial from-[#CEF2F2]/60 via-[#6BB3F2]/10 to-transparent blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-radial from-[#3565F2]/15 via-[#3D79F2]/5 to-transparent blur-3xl pointer-events-none -z-10" />
+      {/* Host Plan Modal */}
+      <HostPlanModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onPublish={handlePublishPlan}
+      />
+
+      {/* FULL EDGE-TO-EDGE COLORFUL CITY ILLUSTRATION BACKGROUND */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <Image
+          src="/illustrations/ColorfulCityBG.webp"
+          alt="Colorful City Background"
+          fill
+          sizes="100vw"
+          priority
+          className="object-cover object-center opacity-100"
+        />
+        {/* Soft Vignettes at Section Edges for Header Text Legibility */}
+        <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#FAFCFF] via-[#FAFCFF]/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#FAFCFF] to-transparent" />
+      </div>
+
+      {/* Background Ambient Auroras */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[950px] h-[680px] rounded-full bg-radial from-[#CEF2F2]/30 via-[#3565F2]/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
       <Container>
         {/* ========================================================= */}
         {/* EDITORIAL SECTION HEADER                                  */}
         {/* ========================================================= */}
-        <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
-          <Badge variant="primary" className="mb-4">
-            EXPLORE EXPERIENCES
-          </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F172A] leading-[1.12] font-display mb-4">
+        <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-14">
+          <div className="exp-reveal mb-4">
+            <Badge variant="primary">
+              EXPLORE EXPERIENCES
+            </Badge>
+          </div>
+          <h2 className="exp-reveal text-3xl sm:text-5xl font-extrabold tracking-tight text-[#0F172A] leading-[1.12] font-display mb-4">
             Find your kind of plan. <br />
             <span className="text-[#3565F2]">Or create one.</span>
           </h2>
-          <p className="text-base sm:text-lg font-medium text-[#475569] leading-relaxed max-w-2xl mx-auto">
-            Every community has its own rhythm — its own regulars, its own reasons to show up. Hover to peek in, or start your own Open Plan.
+          <p className="exp-reveal text-base sm:text-lg font-medium text-[#475569] leading-relaxed max-w-2xl mx-auto mb-6">
+            Every community has its own rhythm — its own regulars, its own reasons to show up. Hover to peek in, or host your own Open Plan.
           </p>
+
+          {/* INTERACTIVE MOCK-UP DISCLAIMER NOTE */}
+          <div className="exp-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100/80 border border-slate-200/80 text-xs font-semibold text-[#64748B]">
+            <span className="w-2 h-2 rounded-full bg-[#3565F2] animate-pulse" />
+            <span>Interactive mock-up — real-time data will be wired once the app is live!</span>
+          </div>
         </div>
 
         {/* ========================================================= */}
-        {/* ORBITAL COMMUNITY CLUSTER CONTAINER                       */}
+        {/* ITEM 4: ORBITAL CLUSTER CONTAINER WITH PARALLAX & DENSITY */}
         {/* ========================================================= */}
         <div
           ref={clusterWrapRef}
           onMouseEnter={() => setIsHoveringCluster(true)}
-          onMouseLeave={() => {
-            setIsHoveringCluster(false);
-            setActiveBubbleId(null);
-          }}
-          className={`relative w-full max-w-[980px] min-h-[580px] sm:h-[640px] mx-auto mb-8 flex flex-wrap sm:block justify-center items-center gap-4 sm:gap-0 select-none ${
+          onMouseLeave={handleClusterMouseLeave}
+          className={`relative w-full max-w-[1380px] min-h-[640px] sm:h-[750px] mx-auto mb-8 flex flex-wrap sm:block justify-center items-center gap-3 sm:gap-0 select-none ${
             isHoveringCluster ? 'cluster-hovering' : ''
           }`}
         >
-          {ORBIT_ITEMS.map((item) => {
+
+          {clusterNodes.map((item) => {
             const isActive = activeBubbleId === item.id;
             const isDimmed = isHoveringCluster && activeBubbleId !== null && !isActive;
 
             // Size styling mapping
             const sizeClass =
               item.size === 'lg'
-                ? 'w-[150px] h-[150px] sm:w-[185px] sm:h-[185px]'
+                ? 'w-[145px] h-[145px] sm:w-[175px] sm:h-[175px]'
                 : item.size === 'md'
-                ? 'w-[120px] h-[120px] sm:w-[140px] sm:h-[140px]'
-                : 'w-[95px] h-[95px] sm:w-[105px] sm:h-[105px]';
+                ? 'w-[115px] h-[115px] sm:w-[135px] sm:h-[135px]'
+                : 'w-[90px] h-[90px] sm:w-[100px] sm:h-[100px]';
 
             return (
               <div
                 key={item.id}
                 ref={item.create ? centerBubbleRef : null}
+                style={item.create ? { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' } : undefined}
+                onClick={() => {
+                  if (item.create) setIsModalOpen(true);
+                }}
                 onMouseEnter={() => setActiveBubbleId(item.id)}
                 onMouseLeave={() => setActiveBubbleId(null)}
-                className={`orbit-bubble sm:absolute rounded-full cursor-pointer flex items-center justify-center text-center shadow-lg transition-all duration-300 transform will-change-transform translate-z-0 backface-hidden ${sizeClass} ${
+                className={`orbit-bubble sm:absolute rounded-full cursor-pointer flex items-center justify-center text-center shadow-lg transition-all duration-300 transform will-change-transform translate-z-0 backface-hidden overflow-hidden ${sizeClass} ${
                   item.create
-                    ? 'bg-[#3565F2] text-white border-2 border-dashed border-white/60 shadow-[0_20px_50px_-18px_rgba(53,101,242,0.5)] z-20'
-                    : `${item.bg} text-[#0F172A] border border-white/80 hover:shadow-2xl`
+                    ? 'bg-[#3565F2] text-white border-2 border-dashed border-white/60 shadow-[0_20px_50px_-18px_rgba(53,101,242,0.55)] z-20'
+                    : 'border-2 border-white shadow-md hover:shadow-2xl'
                 } ${
                   isActive
-                    ? 'scale-110 z-30 ring-4 ring-[#3565F2]/20 opacity-100'
+                    ? 'scale-110 z-30 ring-4 ring-[#3565F2]/40 opacity-100'
                     : isDimmed
-                    ? 'opacity-40 scale-95 z-10'
+                    ? 'opacity-35 scale-95 z-10'
                     : 'opacity-100 z-10'
                 }`}
               >
-                {/* DEFAULT FACE CONTENT */}
-                <div className={`p-3 flex flex-col items-center justify-center transition-opacity duration-200 ${isActive ? 'opacity-0' : 'opacity-100'}`}>
+                {/* DEFAULT FACE CONTENT WITH ILLUSTRATION BACKGROUND */}
+                {!item.create && (
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <Image
+                      src={item.illustration}
+                      alt={item.label}
+                      fill
+                      sizes="(max-width: 768px) 120px, 185px"
+                      priority
+                      className="object-cover object-center scale-105 transition-transform duration-700 hover:scale-115"
+                    />
+                    {/* Gradient Overlay for Text Legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-slate-900/20" />
+                  </div>
+                )}
+
+                {/* DEFAULT FACE TEXT & ICON OVERLAY */}
+                <div className={`relative z-10 p-3 flex flex-col items-center justify-center transition-all duration-300 ${isActive ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}>
                   {item.create ? (
                     <>
                       <Plus className="w-8 h-8 text-white mb-1" />
@@ -429,45 +818,72 @@ export function ExperiencesScreen() {
                     </>
                   ) : (
                     <>
-                      <span className={`${item.size === 'sm' ? 'text-xl' : 'text-2xl sm:text-3xl'} mb-1`}>{item.icon}</span>
-                      <span className={`font-extrabold tracking-tight text-[#0F172A] ${item.size === 'sm' ? 'text-xs' : 'text-xs sm:text-sm'}`}>
+                      <span className={`${item.size === 'sm' ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'} mb-1 filter drop-shadow-md`}>
+                        {item.icon}
+                      </span>
+                      <span
+                        className={`font-extrabold tracking-tight text-white drop-shadow-md ${
+                          item.size === 'sm' ? 'text-[10.5px]' : 'text-xs sm:text-sm'
+                        }`}
+                      >
                         {item.label}
                       </span>
-                      {item.tier && item.size !== 'sm' && (
-                        <span className="text-[10px] font-semibold text-[#5A6485] mt-0.5">{item.tier}</span>
+                      {item.isCity ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#CEF2F2] mt-0.5 px-2 py-0.5 rounded-full bg-[#3565F2]/80 backdrop-blur-xs">
+                          City Hub
+                        </span>
+                      ) : (
+                        item.tier && item.size !== 'sm' && (
+                          <span className="text-[10px] font-bold text-sky-200 mt-0.5 drop-shadow-xs">
+                            {item.tier}
+                          </span>
+                        )
                       )}
                     </>
                   )}
                 </div>
 
-                {/* ACTIVE OVERLAY PEEK CARD */}
+                {/* ACTIVE OVERLAY PEEK CARD (HOVER DETAILS) */}
                 <div
-                  className={`absolute inset-0 rounded-full bg-white/95 backdrop-blur-md p-4 flex flex-col items-center justify-center text-center transition-all duration-300 shadow-xl ${
+                  className={`absolute inset-0 z-20 rounded-full bg-white/95 backdrop-blur-md p-3.5 flex flex-col items-center justify-center text-center transition-all duration-300 shadow-xl overflow-hidden ${
                     isActive ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 pointer-events-none'
                   }`}
                 >
                   {item.create ? (
                     <>
-                      <span className="text-xs font-extrabold text-[#3565F2] mb-1">Don&apos;t see your thing?</span>
+                      <span className="text-xs font-extrabold text-[#3565F2] mb-1">Click to Host!</span>
                       <span className="text-xs font-bold text-[#0F172A]">{item.event}</span>
                       <span className="text-[10px] font-medium text-[#64748B] mt-1">{item.meta}</span>
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-sm">{item.icon}</span>
-                        <span className="text-xs font-extrabold text-[#0F172A]">{item.label}</span>
-                      </div>
-                      
-                      {/* Attendee Avatars */}
-                      <div className="flex -space-x-1.5 mb-2">
-                        <div className="w-5 h-5 rounded-full bg-[#3565F2] border border-white" />
-                        <div className="w-5 h-5 rounded-full bg-[#3D79F2] border border-white" />
-                        <div className="w-5 h-5 rounded-full bg-[#6BB3F2] border border-white" />
+                      {/* Background Illustration Tint on Hover Card */}
+                      <div className="absolute inset-0 opacity-20 pointer-events-none">
+                        <Image
+                          src={item.illustration}
+                          alt={item.label}
+                          fill
+                          sizes="(max-width: 768px) 120px, 185px"
+                          className="object-cover object-center"
+                        />
                       </div>
 
-                      <span className="text-[11px] font-bold text-[#0F172A] line-clamp-1">{item.event}</span>
-                      <span className="text-[9.5px] font-semibold text-[#64748B] line-clamp-1 mt-0.5">{item.meta}</span>
+                      <div className="relative z-10 flex flex-col items-center">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-sm">{item.icon}</span>
+                          <span className="text-xs font-extrabold text-[#0F172A]">{item.label}</span>
+                        </div>
+                        
+                        {/* Attendee Avatars */}
+                        <div className="flex -space-x-1.5 mb-1.5">
+                          <div className="w-4 h-4 rounded-full bg-[#3565F2] border border-white" />
+                          <div className="w-4 h-4 rounded-full bg-[#3D79F2] border border-white" />
+                          <div className="w-4 h-4 rounded-full bg-[#6BB3F2] border border-white" />
+                        </div>
+
+                        <span className="text-[11px] font-bold text-[#0F172A] line-clamp-1">{item.event}</span>
+                        <span className="text-[9.5px] font-semibold text-[#64748B] line-clamp-1 mt-0.5">{item.meta}</span>
+                      </div>
                     </>
                   )}
                 </div>
@@ -476,84 +892,6 @@ export function ExperiencesScreen() {
           })}
         </div>
 
-        {/* Orbit Legend / Hint */}
-        <div className="text-center space-y-1 mb-16">
-          <p className="text-xs font-bold text-[#3565F2] uppercase tracking-wider">
-            Hover any bubble to peek inside live plans
-          </p>
-          <p className="text-xs font-medium text-[#64748B] opacity-80">
-            Bubble orbit radius reflects community activity — established groups orbit closer to the center core.
-          </p>
-        </div>
-
-        {/* ========================================================= */}
-        {/* RELOCATED FEATURE PILLARS                                 */}
-        {/* ========================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="p-8 rounded-3xl bg-white border border-[#E2E8F0] shadow-sm hover:border-[#3565F2]/30 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-[#F2F7FE] flex items-center justify-center text-[#3565F2] mb-6">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-xl text-[#0F172A] mb-2">Curated Gatherings</h3>
-            <p className="text-sm font-medium text-[#64748B] leading-relaxed">
-              From weekend trail runs and rooftop coffee tastings to indie film watch parties.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-white border border-[#E2E8F0] shadow-sm hover:border-[#3565F2]/30 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-[#CEF2F2] flex items-center justify-center text-[#0F172A] mb-6">
-              <Users className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-xl text-[#0F172A] mb-2">Micro-Communities</h3>
-            <p className="text-sm font-medium text-[#64748B] leading-relaxed">
-              Small, intimate groups capped at 10–15 people so everyone actually gets to talk.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-white border border-[#E2E8F0] shadow-sm hover:border-[#3565F2]/30 transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-[#F2F7FE] flex items-center justify-center text-[#3565F2] mb-6">
-              <MapPin className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-xl text-[#0F172A] mb-2">Local Drops</h3>
-            <p className="text-sm font-medium text-[#64748B] leading-relaxed">
-              Discover spontaneous activities happening in your neighborhood today.
-            </p>
-          </div>
-        </div>
-
-        {/* ========================================================= */}
-        {/* SMARTPHONE DEVICE SHOWCASE CARD                            */}
-        {/* ========================================================= */}
-        <div className="rounded-3xl bg-white border border-[#E2E8F0] p-8 sm:p-12 shadow-md grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-6 space-y-6">
-            <Badge variant="cyan">Interactive Event Hub</Badge>
-            <h3 className="text-2xl sm:text-4xl font-extrabold text-[#0F172A] leading-tight">
-              See who is attending before you step out.
-            </h3>
-            <p className="text-base font-medium text-[#475569] leading-relaxed">
-              SnooSpace provides host verification, attendee rosters, and temporary group chats for every event, so you know exactly who you will be meeting.
-            </p>
-            <div className="pt-4 flex items-center gap-6 text-sm font-bold text-[#0F172A]">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#3565F2]" />
-                <span>Verified Hosts</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span>Live Event Chat</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Smartphone Showcase Mockup */}
-          <div className="lg:col-span-6 flex justify-center">
-            <SnooSpaceDevice
-              imageSrc="/snoospace_event_detail.png"
-              imageAlt="SnooSpace Event Details Preview"
-              className="w-[260px] sm:w-[285px]"
-            />
-          </div>
-        </div>
       </Container>
     </section>
   );

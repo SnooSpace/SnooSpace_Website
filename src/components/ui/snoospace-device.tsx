@@ -150,6 +150,7 @@ export const SnooSpaceDevice = forwardRef<HTMLDivElement, SnooSpaceDeviceProps>(
                       src={imageSrc}
                       alt={imageAlt}
                       fill
+                      sizes="(max-width: 768px) 260px, 300px"
                       className="object-cover object-top"
                     />
                   </div>

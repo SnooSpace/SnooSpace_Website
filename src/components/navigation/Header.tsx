@@ -9,11 +9,21 @@ import { ArrowRight } from 'lucide-react';
 import SnooSpaceMasterLogo from '@/assets/logos/SnooSpace_Master_Logo_Light.svg';
 
 export function Header() {
+  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 border-b border-[#E2E8F0]/60 transition-all">
       <Container className="flex h-20 items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center group">
+        <Link href="/" onClick={scrollToTop} className="flex items-center group cursor-pointer">
           <Image
             src={SnooSpaceMasterLogo}
             alt="SnooSpace Logo"

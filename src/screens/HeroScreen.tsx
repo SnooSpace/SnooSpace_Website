@@ -552,6 +552,7 @@ export function HeroScreen() {
                     src={landingScreen2Path}
                     alt="SnooSpace App UI Shell"
                     fill
+                    sizes="(max-width: 768px) 260px, 300px"
                     priority
                     className="object-cover object-top"
                   />
@@ -569,6 +570,7 @@ export function HeroScreen() {
                         src={landingScreen2Path}
                         alt="People Feed Card"
                         fill
+                        sizes="(max-width: 768px) 260px, 300px"
                         priority
                         className="object-cover object-top"
                         style={{ marginTop: '-14.5%' }}
@@ -581,6 +583,7 @@ export function HeroScreen() {
                         src={landingScreen1Path}
                         alt="Community Feed Card"
                         fill
+                        sizes="(max-width: 768px) 260px, 300px"
                         priority
                         className="object-cover object-top"
                         style={{ marginTop: '-14.5%' }}
