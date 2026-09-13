@@ -387,7 +387,7 @@ export function HeroScreen() {
 
           {/* Supporting Copy */}
           <p className="hero-subtext max-w-2xl text-base sm:text-lg font-medium text-[#475569] leading-relaxed mb-8">
-            Discover people and plans worth showing up for — real interests, real cities, real plans, without the endless scroll.
+            Discover people and plans worth showing up for — real interests, real plans, without the endless scroll.
           </p>
 
           {/* Bold Black 'Coming Soon' Text */}

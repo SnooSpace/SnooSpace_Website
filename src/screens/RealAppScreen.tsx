@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, MapPin, ShieldCheck, Plus, Check, Compass } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 if (typeof window !== 'undefined') {
@@ -12,7 +12,7 @@ if (typeof window !== 'undefined') {
 }
 
 interface ScreenItem {
-  id: 'feed' | 'chat' | 'join' | 'swipe';
+  id: 'feed' | 'chat' | 'join' | 'swipe' | 'host' | 'profile' | 'map';
   title: string;
   sub: string;
 }
@@ -22,6 +22,9 @@ const SCREENS: ScreenItem[] = [
   { id: 'chat', title: 'Opening a chat', sub: 'The group keeps going after the event ends.' },
   { id: 'join', title: 'Joining an event', sub: 'One tap, no forms, no friction.' },
   { id: 'swipe', title: 'Swiping through plans', sub: "Skip what's not for you, in a glance." },
+  { id: 'host', title: 'Hosting a plan', sub: 'Set a location, cap spots, and drop it live.' },
+  { id: 'profile', title: 'Verified Member Profiles', sub: 'See mutual connections & past gatherings.' },
+  { id: 'map', title: 'Interactive Map View', sub: 'Explore micro-gatherings dropping in your neighborhood.' },
 ];
 
 export function RealAppScreen() {
@@ -34,80 +37,242 @@ export function RealAppScreen() {
   const captionsRef = useRef<HTMLDivElement[]>([]);
   const loopTimelines = useRef<{ [key: string]: gsap.core.Timeline | gsap.core.Tween }>({});
 
-  const [active, setActive] = useState(0);
-  const [isGrabbing, setIsGrabbing] = useState(false);
-
+  const navTlRef = useRef<gsap.core.Timeline | null>(null);
+  const isAnimatingRef = useRef<boolean>(false);
+  const ignoreClickRef = useRef<boolean>(false);
   const startXRef = useRef<number>(0);
   const isDraggingRef = useRef<boolean>(false);
+  const lastWheelTimeRef = useRef<number>(0);
 
-  // Render 3D Coverflow stage positions
+  // Auto-scroll / Autoplay state refs
+  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const userActivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUserInteractingRef = useRef<boolean>(false);
+  const isIntersectingRef = useRef<boolean>(true);
+
+  const [active, setActive] = useState(0);
+  const activeRef = useRef<number>(0);
+  activeRef.current = active;
+
+  const [isGrabbing, setIsGrabbing] = useState(false);
+
+  // Single coordinated GSAP timeline for silky smooth coverflow motion
   const renderCoverflow = (activeIndex: number) => {
-    if (!slotsRef.current || slotsRef.current.length === 0) return;
+    if (!slotsRef.current.length) return;
+
+    const count = SCREENS.length;
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 640;
+
+    navTlRef.current?.kill();
+
+    isAnimatingRef.current = true;
+    navTlRef.current = gsap.timeline({
+      defaults: {
+        duration: 0.62,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      },
+      onComplete: () => {
+        isAnimatingRef.current = false;
+      },
+    });
 
     slotsRef.current.forEach((slot, i) => {
       if (!slot) return;
-      const offset = i - activeIndex;
+
+      let offset = i - activeIndex;
+      if (offset > count / 2) offset -= count;
+      else if (offset < -count / 2) offset += count;
+
       const abs = Math.abs(offset);
-      let x = offset * 190;
-      let scale = 1;
-      let rot = 0;
-      let opacity = 1;
-      let z = 10;
-      let blur = 0;
+      const x = offset * (isDesktop ? 185 : 130);
 
-      if (offset !== 0) {
-        scale = 0.76 - Math.max(0, abs - 1) * 0.12;
-        rot = offset > 0 ? -26 : 26;
-        opacity = abs >= 2 ? 0.15 : 0.5;
-        z = 10 - abs;
-        blur = abs * 2;
-        x = offset * 168;
-      }
-
-      gsap.to(slot, {
-        x,
-        scale,
-        rotateY: rot,
-        opacity,
-        z: -abs * 80,
-        filter: `blur(${blur}px)`,
-        zIndex: z,
-        duration: 0.6,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      });
+      navTlRef.current!.to(
+        slot,
+        {
+          x,
+          y: 0,
+          scale: abs === 0 ? 1 : abs === 1 ? 0.86 : abs === 2 ? 0.74 : 0.62,
+          opacity: abs === 0 ? 1 : abs === 1 ? 0.72 : abs === 2 ? 0.4 : 0.18,
+          rotateY: 0,
+          zIndex: 100 - abs,
+          force3D: true,
+          clearProps: 'filter',
+        },
+        0
+      );
     });
 
-    // Caption transitions
     captionsRef.current.forEach((cap, i) => {
       if (!cap) return;
-      gsap.to(cap, {
-        opacity: i === activeIndex ? 1 : 0,
-        y: i === activeIndex ? 0 : 10,
-        duration: 0.4,
-        ease: 'power2.out',
-      });
+
+      navTlRef.current!.to(
+        cap,
+        {
+          opacity: i === activeIndex ? 1 : 0,
+          y: i === activeIndex ? 0 : 10,
+          duration: 0.35,
+        },
+        0
+      );
     });
 
-    // Control individual inner screen animations
-    const screenKeys: Array<'feed' | 'chat' | 'join' | 'swipe'> = ['feed', 'chat', 'join', 'swipe'];
+    const screenKeys: Array<'feed' | 'chat' | 'join' | 'swipe' | 'host' | 'profile' | 'map'> = [
+      'feed',
+      'chat',
+      'join',
+      'swipe',
+      'host',
+      'profile',
+      'map',
+    ];
+
     screenKeys.forEach((key, idx) => {
       const tl = loopTimelines.current[key];
-      if (tl) {
-        if (idx === activeIndex) {
-          tl.restart();
-        } else {
-          tl.pause(0);
-        }
-      }
+      if (!tl) return;
+      if (idx === activeIndex) tl.restart();
+      else tl.pause(0);
     });
   };
 
-  const goTo = (i: number) => {
-    const nextIdx = Math.max(0, Math.min(SCREENS.length - 1, i));
+  const startAutoPlay = () => {
+    if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    autoPlayTimerRef.current = setInterval(() => {
+      if (!isUserInteractingRef.current && !isAnimatingRef.current && isIntersectingRef.current) {
+        const nextIdx = (activeRef.current + 1) % SCREENS.length;
+        setActive(nextIdx);
+        renderCoverflow(nextIdx);
+      }
+    }, 3600);
+  };
+
+  const handleUserInteractionStart = () => {
+    isUserInteractingRef.current = true;
+    if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    if (userActivityTimeoutRef.current) clearTimeout(userActivityTimeoutRef.current);
+  };
+
+  const handleUserInteractionEnd = () => {
+    if (userActivityTimeoutRef.current) clearTimeout(userActivityTimeoutRef.current);
+    // Auto-resume autoplay after 4.5s of user inactivity
+    userActivityTimeoutRef.current = setTimeout(() => {
+      isUserInteractingRef.current = false;
+      startAutoPlay();
+    }, 4500);
+  };
+
+  const goTo = (i: number, fromUserAction = false) => {
+    const count = SCREENS.length;
+    const nextIdx = ((i % count) + count) % count;
+
+    if (nextIdx === activeRef.current) return;
+    if (isAnimatingRef.current) return;
+
+    if (fromUserAction) {
+      handleUserInteractionStart();
+      handleUserInteractionEnd();
+    }
+
     setActive(nextIdx);
     renderCoverflow(nextIdx);
   };
+
+  // Pointer drag handling to block click-after-drag
+  const handlePointerDown = (x: number) => {
+    handleUserInteractionStart();
+    isDraggingRef.current = true;
+    startXRef.current = x;
+    setIsGrabbing(true);
+  };
+
+  const handlePointerUp = (x: number) => {
+    if (!isDraggingRef.current) return;
+
+    isDraggingRef.current = false;
+    setIsGrabbing(false);
+
+    const delta = x - startXRef.current;
+
+    if (Math.abs(delta) > 40) {
+      ignoreClickRef.current = true;
+      window.setTimeout(() => {
+        ignoreClickRef.current = false;
+      }, 250);
+
+      goTo(delta < 0 ? activeRef.current + 1 : activeRef.current - 1, true);
+    } else {
+      handleUserInteractionEnd();
+    }
+  };
+
+  // Wheel handler for horizontal scrolling / Shift + Wheel
+  useEffect(() => {
+    const stageEl = stageRef.current;
+    if (!stageEl) return;
+
+    const handleWheelNative = (e: WheelEvent) => {
+      const isHorizontalScroll = Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10;
+      const isShiftWheel = e.shiftKey && Math.abs(e.deltaY) > 10;
+
+      if (isHorizontalScroll || isShiftWheel) {
+        if (isAnimatingRef.current) return;
+        const now = Date.now();
+        if (now - lastWheelTimeRef.current < 300) {
+          e.preventDefault();
+          return;
+        }
+
+        e.preventDefault();
+        lastWheelTimeRef.current = now;
+        const delta = isShiftWheel ? e.deltaY : e.deltaX;
+        const currentActive = activeRef.current;
+        const nextIdx = delta > 0 ? currentActive + 1 : currentActive - 1;
+        goTo(nextIdx, true);
+      }
+    };
+
+    stageEl.addEventListener('wheel', handleWheelNative, { passive: false });
+    return () => {
+      stageEl.removeEventListener('wheel', handleWheelNative);
+    };
+  }, []);
+
+  // Setup Autoplay Observer & Mount/Unmount cleanup
+  useEffect(() => {
+    startAutoPlay();
+
+    const container = sectionRef.current;
+    if (container) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            isIntersectingRef.current = entry.isIntersecting;
+            if (!entry.isIntersecting) {
+              if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+            } else if (!isUserInteractingRef.current) {
+              startAutoPlay();
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(container);
+
+      return () => {
+        observer.unobserve(container);
+        if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+        if (userActivityTimeoutRef.current) clearTimeout(userActivityTimeoutRef.current);
+      };
+    }
+
+    return () => {
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+      if (userActivityTimeoutRef.current) clearTimeout(userActivityTimeoutRef.current);
+    };
+  }, []);
 
   // Build inner GSAP animations for phone screens
   useGSAP(
@@ -188,6 +353,53 @@ export function RealAppScreen() {
         loopTimelines.current.swipe = tl;
       }
 
+      // 5. Host Animation
+      const hostBtn = stage.querySelector('[data-role="publishHostBtn"]');
+      const hostCheck = stage.querySelector('[data-role="publishHostCheck"]');
+      if (hostBtn && hostCheck) {
+        const tl = gsap.timeline({ repeat: -1, paused: true });
+        tl.to(hostBtn, { scale: 0.94, duration: 0.15 }, 0.8)
+          .to(hostBtn, { scale: 1, duration: 0.15 }, 0.95)
+          .to(hostCheck, { opacity: 1, duration: 0.25 }, 1.05)
+          .to({}, { duration: 1.8 })
+          .to(hostCheck, { opacity: 0, duration: 0.25 });
+
+        loopTimelines.current.host = tl;
+      }
+
+      // 6. Profile Animation
+      const profileBadge = stage.querySelector('[data-role="profileBadge"]');
+      const connectBtn = stage.querySelector('[data-role="connectBtn"]');
+      const connectCheck = stage.querySelector('[data-role="connectCheck"]');
+      if (profileBadge && connectBtn && connectCheck) {
+        const tl = gsap.timeline({ repeat: -1, paused: true });
+        tl.to(profileBadge, { scale: 1.08, duration: 0.3 }, 0.5)
+          .to(profileBadge, { scale: 1, duration: 0.3 }, 0.8)
+          .to(connectBtn, { scale: 0.94, duration: 0.15 }, 1.4)
+          .to(connectBtn, { scale: 1, duration: 0.15 }, 1.55)
+          .to(connectCheck, { opacity: 1, duration: 0.25 }, 1.65)
+          .to({}, { duration: 1.8 })
+          .to(connectCheck, { opacity: 0, duration: 0.25 });
+
+        loopTimelines.current.profile = tl;
+      }
+
+      // 7. Map Animation
+      const mapPin = stage.querySelector('[data-role="mapPin"]');
+      const mapBtn = stage.querySelector('[data-role="mapBtn"]');
+      const mapCheck = stage.querySelector('[data-role="mapCheck"]');
+      if (mapPin && mapBtn && mapCheck) {
+        const tl = gsap.timeline({ repeat: -1, paused: true });
+        tl.to(mapPin, { y: -6, duration: 0.4, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0.4)
+          .to(mapBtn, { scale: 0.94, duration: 0.15 }, 1.8)
+          .to(mapBtn, { scale: 1, duration: 0.15 }, 1.95)
+          .to(mapCheck, { opacity: 1, duration: 0.25 }, 2.05)
+          .to({}, { duration: 1.8 })
+          .to(mapCheck, { opacity: 0, duration: 0.25 });
+
+        loopTimelines.current.map = tl;
+      }
+
       // Entrance ScrollTrigger Animation
       gsap.set(slotsRef.current, { opacity: 0, y: 60 });
       gsap.set(headRef.current, { opacity: 0, y: 30 });
@@ -218,28 +430,6 @@ export function RealAppScreen() {
     { scope: sectionRef }
   );
 
-  // Pointer drag/swipe engine
-  const handleDown = (x: number) => {
-    isDraggingRef.current = true;
-    startXRef.current = x;
-    setIsGrabbing(true);
-  };
-
-  const handleUp = (x: number) => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    setIsGrabbing(false);
-
-    const delta = x - startXRef.current;
-    if (Math.abs(delta) > 40) {
-      if (delta < 0) {
-        goTo(active + 1);
-      } else {
-        goTo(active - 1);
-      }
-    }
-  };
-
   return (
     <section
       ref={sectionRef}
@@ -259,18 +449,23 @@ export function RealAppScreen() {
           This is the real app.
         </h2>
         <p className="text-sm sm:text-base text-[#5A6485] font-medium leading-relaxed">
-          Not mockups — swap these for real screen recordings before launch. Drag or click through.
+          Not mockups — swap these for real screen recordings before launch. Drag, click, or swipe through.
         </p>
       </div>
 
-      {/* 3D Coverflow Stage */}
-      <div className="relative z-10 h-[460px] sm:h-[560px] flex items-center justify-center [perspective:1400px]">
+      {/* 3D Stage (Single Timelined Coordinated Stage) */}
+      <div className="relative z-10 h-[460px] sm:h-[560px] flex items-center justify-center">
         <div
           ref={stageRef}
-          onMouseDown={(e) => handleDown(e.clientX)}
-          onMouseUp={(e) => handleUp(e.clientX)}
-          onTouchStart={(e) => handleDown(e.touches[0].clientX)}
-          onTouchEnd={(e) => handleUp(e.changedTouches[0].clientX)}
+          onPointerEnter={handleUserInteractionStart}
+          onPointerLeave={handleUserInteractionEnd}
+          onPointerDown={(e) => handlePointerDown(e.clientX)}
+          onPointerUp={(e) => handlePointerUp(e.clientX)}
+          onPointerCancel={() => {
+            isDraggingRef.current = false;
+            setIsGrabbing(false);
+            handleUserInteractionEnd();
+          }}
           className={`relative w-full h-full flex items-center justify-center touch-pan-y ${
             isGrabbing ? 'cursor-grabbing' : 'cursor-grab'
           }`}
@@ -281,8 +476,13 @@ export function RealAppScreen() {
               ref={(el) => {
                 if (el) slotsRef.current[i] = el;
               }}
-              className={`phone-slot absolute left-1/2 top-1/2 w-[210px] sm:w-[250px] h-[430px] sm:h-[510px] -ml-[105px] sm:-ml-[125px] -mt-[215px] sm:-mt-[255px] [transform-style:preserve-3d] transition-all duration-300 ${
-                i === active ? 'is-active' : ''
+              onClick={() => {
+                if (ignoreClickRef.current || isAnimatingRef.current) return;
+                goTo(i, true);
+              }}
+              style={{ willChange: 'transform, opacity' }}
+              className={`phone-slot absolute left-1/2 top-1/2 w-[210px] sm:w-[250px] h-[430px] sm:h-[510px] -translate-x-1/2 -translate-y-1/2 transform-gpu ${
+                i === active ? 'is-active cursor-default' : 'cursor-pointer'
               }`}
             >
               {/* Phone Radial Ambient Glow */}
@@ -433,6 +633,122 @@ export function RealAppScreen() {
                       </div>
                     </div>
                   )}
+
+                  {/* SLIDE 4: HOST */}
+                  {s.id === 'host' && (
+                    <div className="absolute inset-0 p-[34px_14px_14px] flex flex-col justify-between">
+                      <div className="top-bar flex items-center justify-between pb-2 border-b border-[#E4E8F2]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#3565F2]">Create Plan</span>
+                        <span className="text-[10px] font-bold text-[#5A6485]">Step 2 of 2</span>
+                      </div>
+                      <div className="bg-white rounded-[18px] p-3.5 shadow-sm space-y-2.5 my-auto">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-xl bg-[#F2F7FE] text-[#3565F2] flex items-center justify-center font-bold text-sm">
+                            ☕
+                          </div>
+                          <div>
+                            <div className="text-[12.5px] font-extrabold text-[#12172B]">Morning Coffee & Code</div>
+                            <div className="text-[10px] font-medium text-[#5A6485] flex items-center gap-1">
+                              <MapPin className="w-2.5 h-2.5 text-[#3565F2]" /> Third Wave Coffee · 9:00 AM
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[10.5px]">
+                          <span className="font-semibold text-[#5A6485]">Attendee Cap</span>
+                          <span className="font-extrabold text-[#3565F2] bg-[#EEF2FF] px-2 py-0.5 rounded-full">Max 6 (4 left)</span>
+                        </div>
+                      </div>
+                      <div
+                        data-role="publishHostBtn"
+                        className="bg-[#3565F2] text-white text-center text-[12.5px] font-bold p-[11px] rounded-[12px] relative overflow-hidden shadow-md cursor-pointer"
+                      >
+                        <span>Publish Open Plan</span>
+                        <div
+                          data-role="publishHostCheck"
+                          className="absolute inset-0 bg-[#12172B] flex items-center justify-center opacity-0 font-bold text-white"
+                        >
+                          ✨ Plan Dropped Live!
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SLIDE 5: PROFILE */}
+                  {s.id === 'profile' && (
+                    <div className="absolute inset-0 p-[34px_14px_14px] flex flex-col justify-between">
+                      <div className="bg-white rounded-[18px] p-4 shadow-sm text-center relative overflow-hidden mt-1">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#3565F2] to-[#6BB3F2] mx-auto p-0.5 mb-2 relative">
+                          <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-xl font-bold text-white">
+                            👩‍💻
+                          </div>
+                          <div
+                            data-role="profileBadge"
+                            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#3565F2] border-2 border-white flex items-center justify-center text-white"
+                          >
+                            <ShieldCheck className="w-3 h-3" />
+                          </div>
+                        </div>
+                        <h4 className="text-[14px] font-extrabold text-[#12172B]">Maya Lin 🌟</h4>
+                        <p className="text-[10.5px] font-medium text-[#5A6485]">San Francisco · 14 Plans Hosted</p>
+                        <div className="flex justify-center gap-1.5 mt-2.5">
+                          <span className="text-[9.5px] font-bold bg-[#EEF2FF] text-[#3565F2] px-2 py-0.5 rounded-full">
+                            Verified Host
+                          </span>
+                          <span className="text-[9.5px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
+                            4.9 ★ Rating
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        data-role="connectBtn"
+                        className="bg-[#12172B] text-white text-center text-[12.5px] font-bold p-[11px] rounded-[12px] relative overflow-hidden cursor-pointer"
+                      >
+                        <span>Connect & Invite</span>
+                        <div
+                          data-role="connectCheck"
+                          className="absolute inset-0 bg-[#3565F2] flex items-center justify-center opacity-0 font-bold"
+                        >
+                          ✓ Connection Sent
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SLIDE 6: MAP VIEW */}
+                  {s.id === 'map' && (
+                    <div className="absolute inset-0 p-[34px_13px_13px] flex flex-col justify-between overflow-hidden">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#E4E8F2]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#3565F2]">Live Map</span>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">8 Drops Near You</span>
+                      </div>
+                      <div className="relative w-full h-[220px] rounded-[20px] bg-slate-900 overflow-hidden my-auto flex items-center justify-center border border-slate-800">
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                        
+                        <div data-role="mapPin" className="relative z-10 flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-full bg-[#3565F2]/30 flex items-center justify-center animate-ping absolute inset-0" />
+                          <div className="w-10 h-10 rounded-full bg-[#3565F2] text-white flex items-center justify-center font-bold shadow-lg z-10 border-2 border-white">
+                            📍
+                          </div>
+                          <div className="bg-white/95 backdrop-blur-xs rounded-xl p-2 mt-2 shadow-xl border border-slate-200 text-center">
+                            <div className="text-[11px] font-extrabold text-[#12172B]">Sunset Run Club</div>
+                            <div className="text-[9.5px] font-semibold text-[#5A6485]">0.4 mi · Starts 6pm</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        data-role="mapBtn"
+                        className="bg-[#3565F2] text-white text-center text-[12.5px] font-bold p-[11px] rounded-[12px] relative overflow-hidden shadow-md cursor-pointer"
+                      >
+                        <span>Explore Nearby Drops</span>
+                        <div
+                          data-role="mapCheck"
+                          className="absolute inset-0 bg-[#12172B] flex items-center justify-center opacity-0 font-bold text-white"
+                        >
+                          🛰️ Radar Active
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -448,8 +764,8 @@ export function RealAppScreen() {
             ref={(el) => {
               if (el) captionsRef.current[i] = el;
             }}
-            className="absolute left-0 right-0 transition-all duration-300"
-            style={{ opacity: i === active ? 1 : 0, transform: i === active ? 'translateY(0)' : 'translateY(10px)' }}
+            style={{ willChange: 'transform, opacity' }}
+            className="absolute left-0 right-0 transition-all duration-300 pointer-events-none"
           >
             <h3 className="text-[17px] font-extrabold text-[#12172B] tracking-tight mb-1">{s.title}</h3>
             <p className="text-[13px] font-medium text-[#5A6485]">{s.sub}</p>
@@ -461,9 +777,9 @@ export function RealAppScreen() {
       <div className="relative z-10 flex justify-center items-center gap-3 mt-4">
         <button
           type="button"
-          onClick={() => goTo(active - 1)}
+          onClick={() => goTo(active - 1, true)}
           aria-label="Previous screen"
-          className="w-11 h-11 rounded-full bg-white border border-[#E4E8F2] flex items-center justify-center text-[#12172B] shadow-[0_8px_20px_-10px_rgba(18,23,43,0.2)] hover:bg-[#F3F6FF] active:scale-95 transition-all"
+          className="w-11 h-11 rounded-full bg-white border border-[#E4E8F2] flex items-center justify-center text-[#12172B] shadow-[0_8px_20px_-10px_rgba(18,23,43,0.2)] hover:bg-[#F3F6FF] active:scale-95 transition-all cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -473,7 +789,7 @@ export function RealAppScreen() {
             <button
               key={i}
               type="button"
-              onClick={() => goTo(i)}
+              onClick={() => goTo(i, true)}
               aria-label={`Go to slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
                 i === active ? 'w-5 bg-[#3565F2]' : 'w-1.5 bg-[#E4E8F2] hover:bg-[#5A6485]'
@@ -484,9 +800,9 @@ export function RealAppScreen() {
 
         <button
           type="button"
-          onClick={() => goTo(active + 1)}
+          onClick={() => goTo(active + 1, true)}
           aria-label="Next screen"
-          className="w-11 h-11 rounded-full bg-white border border-[#E4E8F2] flex items-center justify-center text-[#12172B] shadow-[0_8px_20px_-10px_rgba(18,23,43,0.2)] hover:bg-[#F3F6FF] active:scale-95 transition-all"
+          className="w-11 h-11 rounded-full bg-white border border-[#E4E8F2] flex items-center justify-center text-[#12172B] shadow-[0_8px_20px_-10px_rgba(18,23,43,0.2)] hover:bg-[#F3F6FF] active:scale-95 transition-all cursor-pointer"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

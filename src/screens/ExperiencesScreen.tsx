@@ -761,7 +761,6 @@ export function ExperiencesScreen() {
 
           {clusterNodes.map((item) => {
             const isActive = activeBubbleId === item.id;
-            const isDimmed = isHoveringCluster && activeBubbleId !== null && !isActive;
 
             // Size styling mapping
             const sizeClass =
@@ -788,8 +787,6 @@ export function ExperiencesScreen() {
                 } ${
                   isActive
                     ? 'scale-110 z-30 ring-4 ring-[#3565F2]/40 opacity-100'
-                    : isDimmed
-                    ? 'opacity-35 scale-95 z-10'
                     : 'opacity-100 z-10'
                 }`}
               >
