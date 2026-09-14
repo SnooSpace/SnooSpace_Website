@@ -19,8 +19,30 @@ import {
   Users,
   Briefcase,
   ChevronDown,
+  Flag,
+  DoorOpen,
+  Compass,
+  History,
+  Heart,
+  BadgeCheck,
+  Image as LucideImage,
+  MessagesSquare,
+  Sparkles,
+  Handshake,
+  CalendarPlus,
+  SlidersHorizontal,
+  ScanLine,
+  Eye,
+  Trophy,
+  ClipboardList,
+  HelpCircle,
+  Bell,
+  Mic,
+  Megaphone,
+  LayoutDashboard,
 } from 'lucide-react';
 import { CollapsibleContent } from '@/components/ui/accordion';
+import SnooSpaceMasterLogo from '@/assets/logos/SnooSpace_Master_Logo_Light.svg';
 
 // Register GSAP ScrollTrigger
 if (typeof window !== 'undefined') {
@@ -39,6 +61,7 @@ const videoSrc: string | null = '/phone-recordings/Welcome.mp4?v=2';
 // ─────────────────────────────────────────────────────────────
 
 export interface PillarSubItem {
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
   label: string;
   detail: string;
 }
@@ -60,23 +83,25 @@ const PEOPLE_PILLARS: PillarData[] = [
     title: 'Plans and events',
     accent: 'blue',
     items: [
-      { label: 'Host plans', detail: 'Start your own gathering in minutes' },
-      { label: 'Join plans', detail: 'Request to join open plans nearby' },
-      { label: 'Discover events', detail: "Browse what's happening around you" },
-      { label: 'Replay missed', detail: 'Catch highlights from events you missed' },
+      { icon: Flag, label: 'Host plans', detail: 'Start your own gathering in minutes' },
+      { icon: DoorOpen, label: 'Join plans', detail: 'Request to join open plans nearby' },
+      { icon: Compass, label: 'Discover events', detail: "Browse what's happening around you" },
+      { icon: History, label: 'Replay missed', detail: 'Catch highlights from events you missed' },
     ],
   },
   {
     key: 'real-connections',
-    icon: Circle,
+    icon: Heart,
     title: 'Real connections',
     accent: 'teal',
     items: [
       {
+        icon: Circle,
         label: 'Circles',
         detail: 'Mutual connections with people you actually know, not one-way follows',
       },
       {
+        icon: BadgeCheck,
         label: 'Verified only',
         detail: 'Everyone you connect with has passed face verification',
       },
@@ -88,8 +113,8 @@ const PEOPLE_PILLARS: PillarData[] = [
     title: 'Express yourself',
     accent: 'purple',
     items: [
-      { label: 'Posts', detail: 'Share moments with your circles' },
-      { label: 'Chat', detail: 'Message people and groups directly' },
+      { icon: LucideImage, label: 'Posts', detail: 'Share moments with your circles' },
+      { icon: MessagesSquare, label: 'Chat', detail: 'Message people and groups directly' },
     ],
   },
   {
@@ -98,8 +123,8 @@ const PEOPLE_PILLARS: PillarData[] = [
     title: 'Creator path',
     accent: 'coral',
     items: [
-      { label: 'Become a creator', detail: 'Build a following inside SnooSpace' },
-      { label: 'Get sponsors', detail: 'Turn your reach into paid partnerships' },
+      { icon: Sparkles, label: 'Become a creator', detail: 'Build a following inside SnooSpace' },
+      { icon: Handshake, label: 'Get sponsors', detail: 'Turn your reach into paid partnerships' },
     ],
   },
 ];
@@ -111,9 +136,13 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Event engine',
     accent: 'blue',
     items: [
-      { label: 'Host events', detail: 'Publish and manage your event' },
-      { label: 'Deep customization', detail: 'Shape ticket tiers, branding, and details' },
-      { label: 'Scan tickets', detail: 'Check attendees in at the door' },
+      { icon: CalendarPlus, label: 'Host events', detail: 'Publish and manage your event' },
+      {
+        icon: SlidersHorizontal,
+        label: 'Deep customization',
+        detail: 'Shape ticket tiers, branding, and details',
+      },
+      { icon: ScanLine, label: 'Scan tickets', detail: 'Check attendees in at the door' },
     ],
   },
   {
@@ -122,8 +151,8 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Audience intel',
     accent: 'teal',
     items: [
-      { label: 'Audience quality', detail: "See who's engaging, not just showing up" },
-      { label: 'Sponsor matching', detail: 'Package your audience data for sponsors' },
+      { icon: Eye, label: 'Audience quality', detail: "See who's engaging, not just showing up" },
+      { icon: Handshake, label: 'Sponsor matching', detail: 'Package your audience data for sponsors' },
     ],
   },
   {
@@ -132,10 +161,10 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Keep it alive',
     accent: 'purple',
     items: [
-      { label: 'Challenges', detail: 'Prompt members into playful participation' },
-      { label: 'Polls', detail: 'Get quick reads on what members want' },
-      { label: 'Q&A', detail: 'Let members ask, you answer' },
-      { label: 'Nudges', detail: 'Gentle prompts to stay active between events' },
+      { icon: Trophy, label: 'Challenges', detail: 'Prompt members into playful participation' },
+      { icon: ClipboardList, label: 'Polls', detail: 'Get quick reads on what members want' },
+      { icon: HelpCircle, label: 'Q&A', detail: 'Let members ask, you answer' },
+      { icon: Bell, label: 'Nudges', detail: 'Gentle prompts to stay active between events' },
     ],
   },
   {
@@ -144,8 +173,8 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Community hub',
     accent: 'coral',
     items: [
-      { label: 'Group chat', detail: 'Share logistics and updates in one place' },
-      { label: 'Voice box', detail: 'Members start conversations, others join in' },
+      { icon: MessagesSquare, label: 'Group chat', detail: 'Share logistics and updates in one place' },
+      { icon: Mic, label: 'Voice box', detail: 'Members start conversations, others join in' },
     ],
   },
   {
@@ -154,45 +183,74 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Grow and manage',
     accent: 'pink',
     items: [
-      { label: 'Opportunities', detail: 'Post gigs like hiring a video editor' },
-      { label: 'Dashboard', detail: 'Track revenue, attendance, and growth in one view' },
+      { icon: Megaphone, label: 'Opportunities', detail: 'Post gigs like hiring a video editor' },
+      { icon: LayoutDashboard, label: 'Dashboard', detail: 'Track revenue, attendance, and growth in one view' },
     ],
   },
 ];
 
 export const ACCENT_CONFIG: Record<
   PillarAccent,
-  { stroke: string; glow: string; dot: string; iconClass: string }
+  {
+    stroke: string;
+    glow: string;
+    dot: string;
+    iconClass: string;
+    icon: string;
+    chipBg: string;
+    chipIcon: string;
+    panelBg: string;
+  }
 > = {
   blue: {
     stroke: '#3565F2',
     glow: 'rgba(53, 101, 242, 0.8)',
     dot: '#3565F2',
     iconClass: 'text-blue-600',
+    icon: 'text-blue-600',
+    chipBg: 'bg-blue-100',
+    chipIcon: 'text-blue-600',
+    panelBg: 'bg-blue-50/60',
   },
   teal: {
     stroke: '#0D9488',
     glow: 'rgba(13, 148, 136, 0.8)',
     dot: '#0D9488',
     iconClass: 'text-teal-600',
+    icon: 'text-teal-600',
+    chipBg: 'bg-teal-100',
+    chipIcon: 'text-teal-600',
+    panelBg: 'bg-teal-50/60',
   },
   purple: {
     stroke: '#9333EA',
     glow: 'rgba(147, 51, 234, 0.8)',
     dot: '#9333EA',
     iconClass: 'text-purple-600',
+    icon: 'text-purple-600',
+    chipBg: 'bg-purple-100',
+    chipIcon: 'text-purple-600',
+    panelBg: 'bg-purple-50/60',
   },
   coral: {
     stroke: '#EA580C',
     glow: 'rgba(234, 88, 12, 0.8)',
     dot: '#EA580C',
     iconClass: 'text-orange-600',
+    icon: 'text-orange-600',
+    chipBg: 'bg-orange-100',
+    chipIcon: 'text-orange-600',
+    panelBg: 'bg-orange-50/60',
   },
   pink: {
     stroke: '#DB2777',
     glow: 'rgba(219, 39, 119, 0.8)',
     dot: '#DB2777',
     iconClass: 'text-pink-600',
+    icon: 'text-pink-600',
+    chipBg: 'bg-pink-100',
+    chipIcon: 'text-pink-600',
+    panelBg: 'bg-pink-50/60',
   },
 };
 
@@ -238,18 +296,26 @@ function Pillar({ pillar, isOpen, onToggle, isHovered = false, onHover }: Pillar
         />
       </button>
       <CollapsibleContent isOpen={isOpen}>
-        <div className="px-4 pb-3">
-          {pillar.items.map((item, i) => (
-            <div
-              key={item.label}
-              className={`flex flex-col gap-0.5 py-1.5 ${
-                i > 0 ? 'border-t border-slate-100' : ''
-              }`}
-            >
-              <span className="text-xs font-medium text-slate-800">{item.label}</span>
-              <span className="text-[11px] text-slate-500 leading-relaxed">{item.detail}</span>
-            </div>
-          ))}
+        <div className={`px-2.5 pb-2.5 pt-1 ${config.panelBg}`}>
+          {pillar.items.map((item) => {
+            const ItemIcon = item.icon;
+            return (
+              <div
+                key={item.label}
+                className="flex items-start gap-2.5 px-1.5 py-2 rounded-lg"
+              >
+                <span
+                  className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full ${config.chipBg}`}
+                >
+                  <ItemIcon className={`h-3 w-3 ${config.chipIcon}`} aria-hidden="true" />
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium text-slate-800">{item.label}</span>
+                  <span className="text-[11.5px] text-slate-600">{item.detail}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </CollapsibleContent>
     </div>
@@ -276,7 +342,7 @@ function PillarColumn({
   className = '',
 }: PillarColumnProps) {
   return (
-    <div className={`flex flex-col gap-2.5 w-full ${className}`}>
+    <div className={`flex flex-col gap-3.5 sm:gap-4 lg:gap-5 w-full ${className}`}>
       <span className="pl-1 text-xs font-semibold uppercase tracking-wider text-slate-500 font-display">
         {label}
       </span>
@@ -405,17 +471,23 @@ export function HeroScreen() {
     const deviceFrame = phoneEl?.querySelector(
       '.rounded-\\[46px\\], .rounded-\\[50px\\], [class*="aspect-"]'
     ) as HTMLElement | null;
-    const frameRect = deviceFrame ? deviceFrame.getBoundingClientRect() : phoneAnchorRect;
 
-    const phoneLeftX = frameRect.left - containerRect.left;
-    const phoneRightX = frameRect.right - containerRect.left;
-    const phoneTopY = frameRect.top - containerRect.top;
-    const phoneHeight = frameRect.height;
+    // Use unscaled layout dimensions (offsetWidth/offsetHeight are immune to CSS scale transforms)
+    const phoneWidth = deviceFrame?.offsetWidth || 295;
+    const phoneHeight = deviceFrame?.offsetHeight || 590;
+
+    // Calculate unscaled resting phone bounds inside phoneAnchor container
+    const phoneCenterX = phoneAnchorRect.left - containerRect.left + phoneAnchorRect.width / 2;
+    const phoneLeftX = phoneCenterX - phoneWidth / 2;
+    const phoneRightX = phoneCenterX + phoneWidth / 2;
+    const phoneTopY =
+      phoneAnchorRect.top - containerRect.top + (phoneAnchorRect.height - phoneHeight) / 2;
 
     const newRays: RayPath[] = [];
 
-    // 1. Left Pillars (People) — 4 connection rays spread out along phone's left edge
-    const leftSpread = [0.22, 0.38, 0.54, 0.70];
+    // 1. Left Pillars (People) — connection rays fan out from phone's center hub
+    // Symmetrical matching origins for cards 1 to 4
+    const leftSpread = [0.42, 0.46, 0.50, 0.54];
     PEOPLE_PILLARS.forEach((pillar, i) => {
       const el = container.querySelector(`[data-pillar-key="${pillar.key}"]`);
       if (!el) return;
@@ -429,7 +501,12 @@ export function HeroScreen() {
       const py = phoneTopY + phoneHeight * (leftSpread[i] ?? 0.5);
 
       const dx = Math.max(px - targetX, 20);
-      const d = `M ${px} ${py} C ${px - dx * 0.45} ${py}, ${targetX + dx * 0.45} ${targetY}, ${targetX} ${targetY}`;
+      const dy = targetY - py;
+      const cp1x = px - dx * 0.45;
+      const cp1y = py + dy * 0.16;
+      const cp2x = targetX + dx * 0.38;
+      const cp2y = targetY;
+      const d = `M ${px} ${py} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${targetX} ${targetY}`;
 
       newRays.push({
         key: pillar.key,
@@ -441,8 +518,8 @@ export function HeroScreen() {
       });
     });
 
-    // 2. Right Pillars (Communities) — 5 connection rays spread out along phone's right edge
-    const rightSpread = [0.18, 0.32, 0.46, 0.60, 0.74];
+    // 2. Right Pillars (Communities) — connection rays fan out from phone's center hub
+    const rightSpread = [0.42, 0.46, 0.50, 0.54, 0.58];
     COMMUNITY_PILLARS.forEach((pillar, i) => {
       const el = container.querySelector(`[data-pillar-key="${pillar.key}"]`);
       if (!el) return;
@@ -456,7 +533,12 @@ export function HeroScreen() {
       const py = phoneTopY + phoneHeight * (rightSpread[i] ?? 0.5);
 
       const dx = Math.max(targetX - px, 20);
-      const d = `M ${px} ${py} C ${px + dx * 0.45} ${py}, ${targetX - dx * 0.45} ${targetY}, ${targetX} ${targetY}`;
+      const dy = targetY - py;
+      const cp1x = px + dx * 0.45;
+      const cp1y = py + dy * 0.16;
+      const cp2x = targetX - dx * 0.38;
+      const cp2y = targetY;
+      const d = `M ${px} ${py} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${targetX} ${targetY}`;
 
       newRays.push({
         key: pillar.key,
@@ -471,18 +553,25 @@ export function HeroScreen() {
     setRays(newRays);
   }, []);
 
-  // Update rays on mount, window resize, and layout settlement
+  // Update rays on mount, window resize, scroll, and layout settlement
   useEffect(() => {
     updateRayPaths();
 
-    const t1 = setTimeout(updateRayPaths, 60);
+    const t1 = setTimeout(updateRayPaths, 80);
     const t2 = setTimeout(updateRayPaths, 300);
+    const t3 = setTimeout(updateRayPaths, 700);
 
     window.addEventListener('resize', updateRayPaths);
+    window.addEventListener('scroll', updateRayPaths, { passive: true });
+    ScrollTrigger.addEventListener('refresh', updateRayPaths);
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      clearTimeout(t3);
       window.removeEventListener('resize', updateRayPaths);
+      window.removeEventListener('scroll', updateRayPaths);
+      ScrollTrigger.removeEventListener('refresh', updateRayPaths);
     };
   }, [updateRayPaths]);
 
@@ -503,13 +592,13 @@ export function HeroScreen() {
     return () => cancelAnimationFrame(animId);
   }, [leftOpenKey, rightOpenKey, updateRayPaths]);
 
-  // Viewport Intersection Observer for Video Playback Optimization & Speed Adjustment
+  // Viewport Intersection Observer for Video Playback Optimization
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Slow down playback speed (0.65x speed for smooth cinematic experience)
-    video.playbackRate = 0.65;
+    // Normal 1.0x native playback speed for smooth, real-time 60fps recording
+    video.playbackRate = 1.0;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -537,14 +626,12 @@ export function HeroScreen() {
       gsap.set('.hero-badge', { opacity: 0, y: 15 });
       gsap.set('.hero-headline', { opacity: 0, y: 25 });
       gsap.set('.hero-subtext', { opacity: 0, y: 20 });
-      gsap.set('.hero-cta', { opacity: 0, y: 15 });
 
       const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       heroTl
         .to('.hero-badge', { opacity: 1, y: 0, duration: 0.6 })
         .to('.hero-headline', { opacity: 1, y: 0, duration: 0.7 }, '-=0.3')
-        .to('.hero-subtext', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
-        .to('.hero-cta', { opacity: 1, y: 0, duration: 0.5 }, '-=0.3');
+        .to('.hero-subtext', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4');
 
       // 2. ScrollTrigger Driven Reveal for Centerpiece Scene
       gsap.set(phoneRef.current, { opacity: 0, scale: 0.85, y: 70 });
@@ -559,6 +646,9 @@ export function HeroScreen() {
           end: 'bottom 40%',
           toggleActions: 'play none none reverse',
         },
+        onUpdate: () => updateRayPaths(),
+        onComplete: () => updateRayPaths(),
+        onReverseComplete: () => updateRayPaths(),
       });
 
       revealTl
@@ -664,10 +754,15 @@ export function HeroScreen() {
       {/* ========================================================= */}
       <Container className="relative flex flex-col items-center text-center pt-4 mb-16 sm:mb-20">
         <div className="max-w-3xl text-center flex flex-col items-center">
-          {/* Eyebrow Label */}
-          <span className="hero-badge text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#3565F2] mb-4">
-            SNOOSPACE
-          </span>
+          {/* Master Logo Eyebrow */}
+          <div className="hero-badge mb-6 sm:mb-8 flex items-center justify-center">
+            <Image
+              src={SnooSpaceMasterLogo}
+              alt="SnooSpace"
+              priority
+              className="h-8 sm:h-9 md:h-10 w-auto"
+            />
+          </div>
 
           {/* Hero Headline */}
           <h1 className="hero-headline text-[clamp(2.75rem,5.5vw,4.75rem)] font-extrabold tracking-tight text-[#0F172A] leading-[1.08] mb-6 font-display">
@@ -676,16 +771,9 @@ export function HeroScreen() {
           </h1>
 
           {/* Supporting Copy */}
-          <p className="hero-subtext max-w-2xl text-base sm:text-lg font-medium text-[#475569] leading-relaxed mb-8">
+          <p className="hero-subtext max-w-2xl text-base sm:text-lg font-medium text-[#475569] leading-relaxed">
             Discover people and plans worth showing up for — real interests, real plans, without the endless scroll.
           </p>
-
-          {/* Bold Black 'Coming Soon' Text */}
-          <div className="hero-cta flex items-center justify-center pt-2">
-            <span className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold text-[#3565F2] tracking-tight font-display">
-              Coming Soon
-            </span>
-          </div>
         </div>
       </Container>
 
@@ -782,17 +870,17 @@ export function HeroScreen() {
                   className="transition-all duration-300"
                 />
 
-                {/* Active Pulsing Ring on Card Terminal */}
+                {/* Active Outer Ring on Card Terminal */}
                 {isActive && (
                   <circle
                     cx={ray.targetPoint.x}
                     cy={ray.targetPoint.y}
-                    r="8"
+                    r="7"
                     fill="none"
                     stroke={config.dot}
                     strokeWidth="1.5"
-                    opacity="0.75"
-                    className="animate-ping"
+                    opacity="0.5"
+                    className="transition-all duration-300"
                   />
                 )}
               </g>
@@ -801,10 +889,10 @@ export function HeroScreen() {
         </svg>
 
         {/* 3-Column Layout: Left (People) | Center (Phone) | Right (Communities) */}
-        <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-10 xl:gap-14 items-center">
+        <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-14 xl:gap-20 2xl:gap-24 items-center">
           {/* Left Column: People Pillars */}
           <div className="pillar-column flex justify-center lg:justify-end w-full">
-            <div className="w-full max-w-sm">
+            <div className="w-full max-w-sm lg:-translate-y-[33px]">
               <PeopleFeaturePillars
                 openKey={leftOpenKey}
                 onToggle={(k) => setLeftOpenKey((prev) => (prev === k ? null : k))}
