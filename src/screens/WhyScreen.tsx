@@ -303,7 +303,7 @@ export function WhyScreen() {
             We don&apos;t have a friendship problem.
           </h2>
           <h2 className="story-line-2 text-[clamp(2.5rem,5.5vw,4.75rem)] font-extrabold tracking-tight text-[#3565F2] leading-[1.1] font-display mb-6">
-            We have an opportunity problem.
+            We have a discovery problem.
           </h2>
         </div>
       </Container>
