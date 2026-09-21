@@ -10,36 +10,42 @@ import { useGSAP } from '@gsap/react';
 import { SnooSpaceDevice } from '@/components/ui/snoospace-device';
 import {
   CalendarClock,
-  Circle,
-  MessageCircle,
-  Star,
-  Ticket,
-  BarChart3,
-  Lightbulb,
-  Users,
-  Briefcase,
-  ChevronDown,
   Flag,
   DoorOpen,
   Compass,
-  History,
+  Users,
+  Radar,
   Heart,
   BadgeCheck,
+  MessageCircle,
   Image as LucideImage,
   MessagesSquare,
+  Star,
   Sparkles,
   Handshake,
-  CalendarPlus,
-  SlidersHorizontal,
-  ScanLine,
+  Megaphone,
   Eye,
-  Trophy,
   ClipboardList,
   HelpCircle,
+  Trophy,
   Bell,
   Mic,
-  Megaphone,
+  ChevronDown,
+  Ticket,
+  CalendarPlus,
+  Percent,
+  ScanLine,
+  BarChart3,
+  Link2,
+  Send,
+  Inbox,
+  Briefcase,
+  UserCog,
   LayoutDashboard,
+  Target,
+  MapPin,
+  CalendarCheck,
+  Camera,
 } from 'lucide-react';
 import { CollapsibleContent } from '@/components/ui/accordion';
 import SnooSpaceMasterLogo from '@/assets/logos/SnooSpace_Master_Logo_Light.svg';
@@ -64,9 +70,10 @@ export interface PillarSubItem {
   icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
   label: string;
   detail: string;
+  sectionLabel?: string;
 }
 
-export type PillarAccent = 'blue' | 'teal' | 'purple' | 'coral' | 'pink';
+export type PillarAccent = 'blue' | 'teal' | 'purple' | 'coral' | 'pink' | 'indigo';
 
 export interface PillarData {
   key: string;
@@ -76,35 +83,27 @@ export interface PillarData {
   items: PillarSubItem[];
 }
 
-const PEOPLE_PILLARS: PillarData[] = [
+export const PEOPLE_PILLARS: PillarData[] = [
   {
     key: 'plans-events',
     icon: CalendarClock,
     title: 'Plans and events',
     accent: 'blue',
     items: [
-      { icon: Flag, label: 'Host plans', detail: 'Start your own gathering in minutes' },
+      { icon: Flag, label: 'Host plans', detail: 'Start your own informal plan in minutes' },
       { icon: DoorOpen, label: 'Join plans', detail: 'Request to join open plans nearby' },
-      { icon: Compass, label: 'Discover events', detail: "Browse what's happening around you" },
-      { icon: History, label: 'Replay missed', detail: 'Catch highlights from events you missed' },
+      { icon: Compass, label: 'Discover & attend events', detail: 'Browse official events and grab a ticket' },
     ],
   },
   {
-    key: 'real-connections',
-    icon: Heart,
-    title: 'Real connections',
+    key: 'meet-people',
+    icon: Users,
+    title: 'Meet people',
     accent: 'teal',
     items: [
-      {
-        icon: Circle,
-        label: 'Circles',
-        detail: 'Mutual connections with people you actually know, not one-way follows',
-      },
-      {
-        icon: BadgeCheck,
-        label: 'Verified only',
-        detail: 'Everyone you connect with has passed face verification',
-      },
+      { icon: Radar, label: 'Meet people', detail: 'Matched by intent, interests, and taste — with icebreakers built in' },
+      { icon: Heart, label: 'Circles', detail: 'Mutual connections with people you actually know, not one-way follows' },
+      { icon: BadgeCheck, label: 'Verified, twice', detail: 'ID verification for plans, video verification for real-time discovery' },
     ],
   },
   {
@@ -123,13 +122,21 @@ const PEOPLE_PILLARS: PillarData[] = [
     title: 'Creator path',
     accent: 'coral',
     items: [
-      { icon: Sparkles, label: 'Become a creator', detail: 'Build a following inside SnooSpace' },
-      { icon: Handshake, label: 'Get sponsors', detail: 'Turn your reach into paid partnerships' },
+      { icon: Sparkles, label: 'Become a creator', detail: 'Build a following inside SnooSpace', sectionLabel: 'Grow' },
+      { icon: Handshake, label: 'Get discovered by sponsors', detail: 'Set your brand preferences and let sponsors find you' },
+      { icon: Link2, label: 'Collabs', detail: 'Partner directly with communities, brands, and venues' },
+      { icon: Megaphone, label: 'Post opportunities', detail: 'Hire help or offer paid gigs of your own' },
+      { icon: Eye, label: 'Audience insights', detail: "See who's actually following you" },
+      { icon: ClipboardList, label: 'Polls', detail: 'Get quick reads from your audience', sectionLabel: 'Engage' },
+      { icon: HelpCircle, label: 'Q&A', detail: 'Let followers ask, you answer' },
+      { icon: Trophy, label: 'Challenges', detail: 'Prompt playful participation' },
+      { icon: Bell, label: 'Nudges', detail: 'Gentle prompts to stay active' },
+      { icon: Mic, label: 'Voice box', detail: 'Fans start conversations right on your profile' },
     ],
   },
 ];
 
-const COMMUNITY_PILLARS: PillarData[] = [
+export const COMMUNITY_PILLARS: PillarData[] = [
   {
     key: 'event-engine',
     icon: Ticket,
@@ -137,32 +144,38 @@ const COMMUNITY_PILLARS: PillarData[] = [
     accent: 'blue',
     items: [
       { icon: CalendarPlus, label: 'Host events', detail: 'Publish and manage your event' },
-      {
-        icon: SlidersHorizontal,
-        label: 'Deep customization',
-        detail: 'Shape ticket tiers, branding, and details',
-      },
+      { icon: Percent, label: 'Ticket tiers & promo codes', detail: 'Multiple pricing tiers, discounts, and codes' },
       { icon: ScanLine, label: 'Scan tickets', detail: 'Check attendees in at the door' },
     ],
   },
   {
-    key: 'audience-intel',
+    key: 'audience-sponsors',
     icon: BarChart3,
-    title: 'Audience intel',
+    title: 'Audience & sponsors',
     accent: 'teal',
     items: [
-      { icon: Eye, label: 'Audience quality', detail: "See who's engaging, not just showing up" },
-      { icon: Handshake, label: 'Sponsor matching', detail: 'Package your audience data for sponsors' },
+      { icon: Eye, label: 'Audience quality', detail: 'Buying power, tiers, and demographics, not just follower counts' },
+      { icon: Handshake, label: 'Get discovered by sponsors', detail: 'Set your preferences and let brands find you' },
+    ],
+  },
+  {
+    key: 'collabs',
+    icon: Link2,
+    title: 'Collabs',
+    accent: 'indigo',
+    items: [
+      { icon: Send, label: 'Pitch a partnership', detail: 'Propose a collab to creators, brands, or venues' },
+      { icon: Inbox, label: 'Get pitched to', detail: 'Proposals come to you from creators, brands, and venues' },
     ],
   },
   {
     key: 'keep-it-alive',
-    icon: Lightbulb,
+    icon: Sparkles,
     title: 'Keep it alive',
     accent: 'purple',
     items: [
-      { icon: Trophy, label: 'Challenges', detail: 'Prompt members into playful participation' },
-      { icon: ClipboardList, label: 'Polls', detail: 'Get quick reads on what members want' },
+      { icon: Trophy, label: 'Challenges', detail: 'Prompt playful participation' },
+      { icon: ClipboardList, label: 'Polls', detail: 'Quick reads on what members want' },
       { icon: HelpCircle, label: 'Q&A', detail: 'Let members ask, you answer' },
       { icon: Bell, label: 'Nudges', detail: 'Gentle prompts to stay active between events' },
     ],
@@ -183,8 +196,78 @@ const COMMUNITY_PILLARS: PillarData[] = [
     title: 'Grow and manage',
     accent: 'pink',
     items: [
-      { icon: Megaphone, label: 'Opportunities', detail: 'Post gigs like hiring a video editor' },
-      { icon: LayoutDashboard, label: 'Dashboard', detail: 'Track revenue, attendance, and growth in one view' },
+      { icon: Megaphone, label: 'Post opportunities', detail: 'Hire help and manage applicants' },
+      { icon: UserCog, label: 'Team & co-hosts', detail: 'Assign co-organizers and permissions' },
+      { icon: LayoutDashboard, label: 'Dashboard & payouts', detail: 'Revenue, attendance, and settlements in one view' },
+    ],
+  },
+];
+
+export const BRAND_PILLARS: PillarData[] = [
+  {
+    key: 'find-your-fit',
+    icon: Target,
+    title: 'Find your fit',
+    accent: 'blue',
+    items: [
+      { icon: Target, label: 'Smart matching', detail: 'Discover communities by real audience data, not follower counts' },
+      { icon: Megaphone, label: 'Targeted ads', detail: 'Reach the right communities and users directly' },
+    ],
+  },
+  {
+    key: 'collabs',
+    icon: Link2,
+    title: 'Collabs',
+    accent: 'coral',
+    items: [
+      { icon: Send, label: 'Post a collab', detail: 'Put your brief out there' },
+      { icon: Inbox, label: 'Get pitched', detail: 'Creators and communities come to you — no more cold DMs or emails' },
+    ],
+  },
+  {
+    key: 'content',
+    icon: Camera,
+    title: 'Content',
+    accent: 'purple',
+    items: [
+      { icon: LucideImage, label: 'Posts', detail: 'Share campaign photos and videos with the SnooSpace audience' },
+      { icon: ClipboardList, label: 'Polls', detail: 'Get quick reads from communities and creators' },
+      { icon: Trophy, label: 'Challenges', detail: 'Launch a branded challenge and see who shows up' },
+      { icon: HelpCircle, label: 'Q&A', detail: 'Answer questions directly from your audience' },
+    ],
+  },
+];
+
+export const VENUE_PILLARS: PillarData[] = [
+  {
+    key: 'venue-online',
+    icon: MapPin,
+    title: 'Your venue, online',
+    accent: 'teal',
+    items: [
+      { icon: MapPin, label: 'List your space', detail: 'Put your venue on the map' },
+      { icon: Compass, label: 'Get discovered', detail: 'Show up to people browsing nearby' },
+      { icon: CalendarCheck, label: 'Get booked directly', detail: 'Communities book your space to host events' },
+    ],
+  },
+  {
+    key: 'collabs',
+    icon: Link2,
+    title: 'Collabs',
+    accent: 'coral',
+    items: [
+      { icon: Send, label: 'Pitch a collab', detail: 'Invite creators to review or promote your space' },
+      { icon: Inbox, label: 'Get pitched to', detail: 'Creators and communities reach out wanting to use your space' },
+    ],
+  },
+  {
+    key: 'content',
+    icon: Camera,
+    title: 'Show it off',
+    accent: 'purple',
+    items: [
+      { icon: LucideImage, label: 'Posts', detail: 'Share photos and video of your space' },
+      { icon: ClipboardList, label: 'Polls', detail: 'Ask your community what to host next' },
     ],
   },
 ];
@@ -252,6 +335,16 @@ export const ACCENT_CONFIG: Record<
     chipIcon: 'text-pink-600',
     panelBg: 'bg-pink-50/60',
   },
+  indigo: {
+    stroke: '#4F46E5',
+    glow: 'rgba(79, 70, 229, 0.8)',
+    dot: '#4F46E5',
+    iconClass: 'text-indigo-600',
+    icon: 'text-indigo-600',
+    chipBg: 'bg-indigo-100',
+    chipIcon: 'text-indigo-600',
+    panelBg: 'bg-indigo-50/60',
+  },
 };
 
 interface PillarProps {
@@ -264,7 +357,7 @@ interface PillarProps {
 
 function Pillar({ pillar, isOpen, onToggle, isHovered = false, onHover }: PillarProps) {
   const Icon = pillar.icon;
-  const config = ACCENT_CONFIG[pillar.accent];
+  const config = ACCENT_CONFIG[pillar.accent] ?? ACCENT_CONFIG.blue;
   const iconClass = config?.iconClass ?? 'text-slate-600';
 
   return (
@@ -297,21 +390,29 @@ function Pillar({ pillar, isOpen, onToggle, isHovered = false, onHover }: Pillar
       </button>
       <CollapsibleContent isOpen={isOpen}>
         <div className={`px-2.5 pb-2.5 pt-1 ${config.panelBg}`}>
-          {pillar.items.map((item) => {
+          {pillar.items.map((item, i) => {
             const ItemIcon = item.icon;
             return (
-              <div
-                key={item.label}
-                className="flex items-start gap-2.5 px-1.5 py-2 rounded-lg"
-              >
-                <span
-                  className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full ${config.chipBg}`}
-                >
-                  <ItemIcon className={`h-3 w-3 ${config.chipIcon}`} aria-hidden="true" />
-                </span>
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-medium text-slate-800">{item.label}</span>
-                  <span className="text-[11.5px] text-slate-600">{item.detail}</span>
+              <div key={item.label}>
+                {item.sectionLabel && (
+                  <div
+                    className={`px-1.5 ${
+                      i === 0 ? 'pt-0.5 pb-1' : 'pt-2.5 pb-1'
+                    } text-[10px] font-semibold uppercase tracking-wide text-slate-400`}
+                  >
+                    {item.sectionLabel}
+                  </div>
+                )}
+                <div className="flex items-start gap-2.5 px-1.5 py-2 rounded-lg">
+                  <span
+                    className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full ${config.chipBg}`}
+                  >
+                    <ItemIcon className={`h-3 w-3 ${config.chipIcon}`} aria-hidden="true" />
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-medium text-slate-800">{item.label}</span>
+                    <span className="text-[11.5px] text-slate-600">{item.detail}</span>
+                  </div>
                 </div>
               </div>
             );
@@ -410,6 +511,100 @@ export function CommunityFeaturePillars(props: {
   );
 }
 
+export function BrandFeaturePillars(props: {
+  openKey?: string | null;
+  onToggle?: (key: string) => void;
+  hoveredKey?: string | null;
+  onHover?: (key: string | null) => void;
+  className?: string;
+}) {
+  const [internalOpenKey, setInternalOpenKey] = useState<string | null>(null);
+  const openKey = props.openKey !== undefined ? props.openKey : internalOpenKey;
+  const onToggle =
+    props.onToggle ?? ((k: string) => setInternalOpenKey((prev) => (prev === k ? null : k)));
+
+  return (
+    <PillarColumn
+      label="For brands"
+      pillars={BRAND_PILLARS}
+      openKey={openKey}
+      onToggle={onToggle}
+      hoveredKey={props.hoveredKey ?? null}
+      onHover={props.onHover}
+      className={props.className}
+    />
+  );
+}
+
+export function VenueFeaturePillars(props: {
+  openKey?: string | null;
+  onToggle?: (key: string) => void;
+  hoveredKey?: string | null;
+  onHover?: (key: string | null) => void;
+  className?: string;
+}) {
+  const [internalOpenKey, setInternalOpenKey] = useState<string | null>(null);
+  const openKey = props.openKey !== undefined ? props.openKey : internalOpenKey;
+  const onToggle =
+    props.onToggle ?? ((k: string) => setInternalOpenKey((prev) => (prev === k ? null : k)));
+
+  return (
+    <PillarColumn
+      label="For venues"
+      pillars={VENUE_PILLARS}
+      openKey={openKey}
+      onToggle={onToggle}
+      hoveredKey={props.hoveredKey ?? null}
+      onHover={props.onHover}
+      className={props.className}
+    />
+  );
+}
+
+// Toggle between the two persona pairs that flank the phone mockup.
+// Brands & Venues carries a "Coming Later" badge since neither persona
+// ships with the initial launch.
+export function PersonaPairToggle({
+  pair,
+  onChange,
+  className = '',
+}: {
+  pair: 'people-community' | 'brands-venues';
+  onChange: (pair: 'people-community' | 'brands-venues') => void;
+  className?: string;
+}) {
+  const isPC = pair === 'people-community';
+  return (
+    <div className={`flex justify-center gap-2 mb-5 ${className}`}>
+      <button
+        type="button"
+        onClick={() => onChange('people-community')}
+        className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors cursor-pointer select-none ${
+          isPC
+            ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+        }`}
+      >
+        People &amp; Communities
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('brands-venues')}
+        className={`relative px-4 py-2 rounded-full text-sm font-medium border transition-colors cursor-pointer select-none ${
+          !isPC
+            ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+        }`}
+      >
+        Brands &amp; Venues
+        <span className="absolute -top-2 -right-2 rounded-full bg-amber-400 px-1.5 py-0.5 text-[9px] font-semibold text-amber-950 whitespace-nowrap shadow-xs">
+          Coming Later
+        </span>
+      </button>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
 // [DEAD CODE - Flagged for audit reference; not rendered]
 // Previously used for the 9 absolutely positioned floating feature bubbles
@@ -428,6 +623,7 @@ export const INTERACTIVE_NODES_DEAD_CODE = [
 ];
 
 export interface RayPath {
+  id: string;
   key: string;
   d: string;
   side: 'left' | 'right';
@@ -439,6 +635,8 @@ export interface RayPath {
 export function HeroScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const centerpieceRef = useRef<HTMLDivElement>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
+  const rightColumnRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const phoneAnchorRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -446,10 +644,23 @@ export function HeroScreen() {
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
+  // Persona pair state: default is 'people-community'
+  const [pair, setPair] = useState<'people-community' | 'brands-venues'>('people-community');
+  const isPC = pair === 'people-community';
+
   // Accordion open states (both null -> NO card open by default)
   const [leftOpenKey, setLeftOpenKey] = useState<string | null>(null);
   const [rightOpenKey, setRightOpenKey] = useState<string | null>(null);
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [hoveredRayId, setHoveredRayId] = useState<string | null>(null);
+
+  // Switching pairs explicitly resets any open accordion pillar to closed
+  const handlePairChange = (newPair: 'people-community' | 'brands-venues') => {
+    if (newPair === pair) return;
+    setPair(newPair);
+    setLeftOpenKey(null);
+    setRightOpenKey(null);
+    setHoveredRayId(null);
+  };
 
   // Dynamic connection ray paths
   const [rays, setRays] = useState<RayPath[]>([]);
@@ -465,6 +676,10 @@ export function HeroScreen() {
     const phoneAnchorRect = phoneAnchor.getBoundingClientRect();
 
     if (containerRect.width === 0 || phoneAnchorRect.width === 0) return;
+
+    // Scope queries to columns to avoid collision when both sides share keys (e.g. 'collabs', 'content')
+    const leftCol = leftColumnRef.current || container;
+    const rightCol = rightColumnRef.current || container;
 
     // Detect exact hardware bezel frame of SnooSpaceDevice
     const phoneEl = phoneRef.current;
@@ -485,11 +700,24 @@ export function HeroScreen() {
 
     const newRays: RayPath[] = [];
 
-    // 1. Left Pillars (People) — connection rays fan out from phone's center hub
-    // Symmetrical matching origins for cards 1 to 4
-    const leftSpread = [0.42, 0.46, 0.50, 0.54];
-    PEOPLE_PILLARS.forEach((pillar, i) => {
-      const el = container.querySelector(`[data-pillar-key="${pillar.key}"]`);
+    const activeLeftPillars = isPC ? PEOPLE_PILLARS : BRAND_PILLARS;
+    const activeRightPillars = isPC ? COMMUNITY_PILLARS : VENUE_PILLARS;
+
+    // 1. Left Pillars — connection rays calibrated to bracket the central feed card
+    // For 3 items (Brands): [0.47, 0.55, 0.63]
+    // - Top card ('Find your fit') angles downward into the top edge of the feed card
+    // - Middle card ('Collabs') bridges nearly horizontal into the center of the feed card
+    // - Bottom card ('Content') angles upward into the lower section of the feed card
+    const leftCount = activeLeftPillars.length;
+    const leftSpread =
+      leftCount === 3
+        ? [0.47, 0.55, 0.63]
+        : leftCount === 4
+        ? [0.44, 0.51, 0.58, 0.65]
+        : [0.55];
+
+    activeLeftPillars.forEach((pillar, i) => {
+      const el = leftCol.querySelector(`[data-pillar-key="${pillar.key}"]`);
       if (!el) return;
       const pRect = el.getBoundingClientRect();
       const btn = el.querySelector('button') || el;
@@ -498,17 +726,19 @@ export function HeroScreen() {
       const targetX = pRect.right - containerRect.left;
       const targetY = bRect.top + bRect.height / 2 - containerRect.top;
       const px = phoneLeftX;
-      const py = phoneTopY + phoneHeight * (leftSpread[i] ?? 0.5);
+      const spreadRatio = leftSpread[i] ?? (0.44 + (i / (leftCount - 1)) * 0.21);
+      const py = phoneTopY + phoneHeight * spreadRatio;
 
       const dx = Math.max(px - targetX, 20);
-      const dy = targetY - py;
-      const cp1x = px - dx * 0.45;
-      const cp1y = py + dy * 0.16;
-      const cp2x = targetX + dx * 0.38;
+      // Clean cubic bezier with smooth horizontal tangents at both the phone bezel and card anchor
+      const cp1x = px - dx * 0.48;
+      const cp1y = py;
+      const cp2x = targetX + dx * 0.48;
       const cp2y = targetY;
       const d = `M ${px} ${py} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${targetX} ${targetY}`;
 
       newRays.push({
+        id: `left-${pillar.key}`,
         key: pillar.key,
         d,
         side: 'left',
@@ -518,10 +748,21 @@ export function HeroScreen() {
       });
     });
 
-    // 2. Right Pillars (Communities) — connection rays fan out from phone's center hub
-    const rightSpread = [0.42, 0.46, 0.50, 0.54, 0.58];
-    COMMUNITY_PILLARS.forEach((pillar, i) => {
-      const el = container.querySelector(`[data-pillar-key="${pillar.key}"]`);
+    // 2. Right Pillars — connection rays calibrated to bracket the central feed card
+    // For 3 items (Venues): [0.47, 0.55, 0.63]
+    // - Top card ('Your venue, online') angles downward into the top edge of the feed card
+    // - Middle card ('Collabs') bridges nearly horizontal into the center of the feed card
+    // - Bottom card ('Show it off') angles upward into the lower section of the feed card
+    const rightCount = activeRightPillars.length;
+    const rightSpread =
+      rightCount === 3
+        ? [0.47, 0.55, 0.63]
+        : rightCount === 6
+        ? [0.40, 0.46, 0.52, 0.58, 0.64, 0.70]
+        : [0.55];
+
+    activeRightPillars.forEach((pillar, i) => {
+      const el = rightCol.querySelector(`[data-pillar-key="${pillar.key}"]`);
       if (!el) return;
       const pRect = el.getBoundingClientRect();
       const btn = el.querySelector('button') || el;
@@ -530,17 +771,19 @@ export function HeroScreen() {
       const targetX = pRect.left - containerRect.left;
       const targetY = bRect.top + bRect.height / 2 - containerRect.top;
       const px = phoneRightX;
-      const py = phoneTopY + phoneHeight * (rightSpread[i] ?? 0.5);
+      const spreadRatio = rightSpread[i] ?? (0.40 + (i / (rightCount - 1)) * 0.30);
+      const py = phoneTopY + phoneHeight * spreadRatio;
 
       const dx = Math.max(targetX - px, 20);
-      const dy = targetY - py;
-      const cp1x = px + dx * 0.45;
-      const cp1y = py + dy * 0.16;
-      const cp2x = targetX - dx * 0.38;
+      // Clean cubic bezier with smooth horizontal tangents at both the phone bezel and card anchor
+      const cp1x = px + dx * 0.48;
+      const cp1y = py;
+      const cp2x = targetX - dx * 0.48;
       const cp2y = targetY;
       const d = `M ${px} ${py} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${targetX} ${targetY}`;
 
       newRays.push({
+        id: `right-${pillar.key}`,
         key: pillar.key,
         d,
         side: 'right',
@@ -551,7 +794,7 @@ export function HeroScreen() {
     });
 
     setRays(newRays);
-  }, []);
+  }, [isPC]);
 
   // Update rays on mount, window resize, scroll, and layout settlement
   useEffect(() => {
@@ -574,6 +817,17 @@ export function HeroScreen() {
       ScrollTrigger.removeEventListener('refresh', updateRayPaths);
     };
   }, [updateRayPaths]);
+
+  // Recalculate rays when persona pair toggles
+  useEffect(() => {
+    updateRayPaths();
+    const t1 = setTimeout(updateRayPaths, 60);
+    const t2 = setTimeout(updateRayPaths, 200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [pair, updateRayPaths]);
 
   // Smoothly track ray curvature in real-time during accordion transitions
   useEffect(() => {
@@ -626,12 +880,14 @@ export function HeroScreen() {
       gsap.set('.hero-badge', { opacity: 0, y: 15 });
       gsap.set('.hero-headline', { opacity: 0, y: 25 });
       gsap.set('.hero-subtext', { opacity: 0, y: 20 });
+      gsap.set('.persona-toggle', { opacity: 0, y: 15 });
 
       const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       heroTl
         .to('.hero-badge', { opacity: 1, y: 0, duration: 0.6 })
         .to('.hero-headline', { opacity: 1, y: 0, duration: 0.7 }, '-=0.3')
-        .to('.hero-subtext', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4');
+        .to('.hero-subtext', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+        .to('.persona-toggle', { opacity: 1, y: 0, duration: 0.5 }, '-=0.3');
 
       // 2. ScrollTrigger Driven Reveal for Centerpiece Scene
       gsap.set(phoneRef.current, { opacity: 0, scale: 0.85, y: 70 });
@@ -742,7 +998,7 @@ export function HeroScreen() {
     { scope: containerRef }
   );
 
-  const anyActive = Boolean(hoveredKey || leftOpenKey || rightOpenKey);
+  const anyActive = Boolean(hoveredRayId || leftOpenKey || rightOpenKey);
 
   return (
     <section
@@ -772,7 +1028,7 @@ export function HeroScreen() {
 
           {/* Supporting Copy */}
           <p className="hero-subtext max-w-2xl text-base sm:text-lg font-medium text-[#475569] leading-relaxed">
-            Discover people and plans worth showing up for — real interests, real plans, without the endless scroll.
+            Where people discover communities, communities create experiences, and brands and venues help bring them to life — with connections that last long after the event.
           </p>
         </div>
       </Container>
@@ -782,10 +1038,17 @@ export function HeroScreen() {
       {/* ========================================================= */}
       <div
         ref={centerpieceRef}
-        className="relative w-full min-h-[68vh] sm:min-h-[75vh] flex items-center justify-center select-none px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+        className="relative w-full min-h-[68vh] sm:min-h-[75vh] flex flex-col items-center justify-center select-none px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
       >
         {/* Soft Ambient Radial Lighting Background (Kept as requested) */}
         <div className="hero-ambient-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[750px] bg-radial from-[#CEF2F2]/75 via-[#3565F2]/12 to-transparent blur-3xl pointer-events-none -z-10 opacity-80" />
+
+        {/* Persona Pair Toggle (Above the phone mockup) */}
+        <PersonaPairToggle
+          pair={pair}
+          onChange={handlePairChange}
+          className="persona-toggle relative z-20 mb-6 sm:mb-8"
+        />
 
         {/* Dynamic SVG Connection Rays (Desktop/Laptop lg+ only) */}
         <svg
@@ -804,22 +1067,22 @@ export function HeroScreen() {
           </defs>
 
           {rays.map((ray) => {
-            const isHovered = hoveredKey === ray.key;
+            const isHovered = hoveredRayId === ray.id;
             const isOpen = (ray.side === 'left' ? leftOpenKey : rightOpenKey) === ray.key;
             const isActive = isHovered || isOpen;
             const config = ACCENT_CONFIG[ray.accent];
 
             return (
-              <g key={ray.key} className="transition-opacity duration-300">
+              <g key={ray.id} className="transition-opacity duration-300">
                 {/* Invisible Wide Hit Target for Line Hover */}
                 <path
                   d={ray.d}
                   stroke="transparent"
-                  strokeWidth="20"
+                  strokeWidth="24"
                   fill="none"
                   className="pointer-events-auto cursor-pointer"
-                  onMouseEnter={() => setHoveredKey(ray.key)}
-                  onMouseLeave={() => setHoveredKey(null)}
+                  onMouseEnter={() => setHoveredRayId(ray.id)}
+                  onMouseLeave={() => setHoveredRayId(null)}
                 />
 
                 {/* Base Continuous Living Stream Line Path */}
@@ -828,11 +1091,11 @@ export function HeroScreen() {
                     isActive ? '' : 'animate-gentle-flow'
                   }`}
                   d={ray.d}
-                  stroke={isActive ? config.stroke : '#3565F2'}
-                  strokeWidth={isActive ? '2.5' : '1.5'}
-                  strokeDasharray={isActive ? '10 6' : '6 6'}
+                  stroke={config.stroke}
+                  strokeWidth={isActive ? '2.5' : '1.75'}
+                  strokeDasharray={isActive ? '8 6' : '6 5'}
                   fill="none"
-                  opacity={isActive ? 0.95 : anyActive ? 0.12 : 0.32}
+                  opacity={isActive ? 0.95 : anyActive ? 0.15 : 0.45}
                   filter={isActive ? `drop-shadow(0 0 6px ${config.glow})` : 'none'}
                 />
 
@@ -854,9 +1117,9 @@ export function HeroScreen() {
                 <circle
                   cx={ray.phonePoint.x}
                   cy={ray.phonePoint.y}
-                  r={isActive ? 3.5 : 2.5}
-                  fill={isActive ? config.dot : '#3565F2'}
-                  opacity={isActive ? 1 : anyActive ? 0.2 : 0.6}
+                  r={isActive ? 4 : 3}
+                  fill={config.dot}
+                  opacity={isActive ? 1 : anyActive ? 0.25 : 0.75}
                   className="transition-all duration-300"
                 />
 
@@ -864,9 +1127,9 @@ export function HeroScreen() {
                 <circle
                   cx={ray.targetPoint.x}
                   cy={ray.targetPoint.y}
-                  r={isActive ? 4 : 3}
-                  fill={isActive ? config.dot : '#3565F2'}
-                  opacity={isActive ? 1 : anyActive ? 0.2 : 0.7}
+                  r={isActive ? 4.5 : 3.5}
+                  fill={config.dot}
+                  opacity={isActive ? 1 : anyActive ? 0.25 : 0.85}
                   className="transition-all duration-300"
                 />
 
@@ -879,7 +1142,7 @@ export function HeroScreen() {
                     fill="none"
                     stroke={config.dot}
                     strokeWidth="1.5"
-                    opacity="0.5"
+                    opacity="0.6"
                     className="transition-all duration-300"
                   />
                 )}
@@ -888,17 +1151,26 @@ export function HeroScreen() {
           })}
         </svg>
 
-        {/* 3-Column Layout: Left (People) | Center (Phone) | Right (Communities) */}
+        {/* 3-Column Layout: Left (People/Brands) | Center (Phone) | Right (Communities/Venues) */}
         <div className="relative z-10 w-full grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-14 xl:gap-20 2xl:gap-24 items-center">
-          {/* Left Column: People Pillars */}
-          <div className="pillar-column flex justify-center lg:justify-end w-full">
-            <div className="w-full max-w-sm lg:-translate-y-[33px]">
-              <PeopleFeaturePillars
-                openKey={leftOpenKey}
-                onToggle={(k) => setLeftOpenKey((prev) => (prev === k ? null : k))}
-                hoveredKey={hoveredKey}
-                onHover={setHoveredKey}
-              />
+          {/* Left Column: People or Brand Pillars */}
+          <div ref={leftColumnRef} className="pillar-column flex justify-center lg:justify-end w-full">
+            <div className={`w-full max-w-sm ${isPC ? 'lg:-translate-y-[33px]' : ''}`}>
+              {isPC ? (
+                <PeopleFeaturePillars
+                  openKey={leftOpenKey}
+                  onToggle={(k) => setLeftOpenKey((prev) => (prev === k ? null : k))}
+                  hoveredKey={hoveredRayId?.startsWith('left-') ? hoveredRayId.replace('left-', '') : null}
+                  onHover={(k) => setHoveredRayId(k ? `left-${k}` : null)}
+                />
+              ) : (
+                <BrandFeaturePillars
+                  openKey={leftOpenKey}
+                  onToggle={(k) => setLeftOpenKey((prev) => (prev === k ? null : k))}
+                  hoveredKey={hoveredRayId?.startsWith('left-') ? hoveredRayId.replace('left-', '') : null}
+                  onHover={(k) => setHoveredRayId(k ? `left-${k}` : null)}
+                />
+              )}
             </div>
           </div>
 
@@ -998,15 +1270,24 @@ export function HeroScreen() {
             </SnooSpaceDevice>
           </div>
 
-          {/* Right Column: Community Pillars */}
-          <div className="pillar-column flex justify-center lg:justify-start w-full">
+          {/* Right Column: Community or Venue Pillars */}
+          <div ref={rightColumnRef} className="pillar-column flex justify-center lg:justify-start w-full">
             <div className="w-full max-w-sm">
-              <CommunityFeaturePillars
-                openKey={rightOpenKey}
-                onToggle={(k) => setRightOpenKey((prev) => (prev === k ? null : k))}
-                hoveredKey={hoveredKey}
-                onHover={setHoveredKey}
-              />
+              {isPC ? (
+                <CommunityFeaturePillars
+                  openKey={rightOpenKey}
+                  onToggle={(k) => setRightOpenKey((prev) => (prev === k ? null : k))}
+                  hoveredKey={hoveredRayId?.startsWith('right-') ? hoveredRayId.replace('right-', '') : null}
+                  onHover={(k) => setHoveredRayId(k ? `right-${k}` : null)}
+                />
+              ) : (
+                <VenueFeaturePillars
+                  openKey={rightOpenKey}
+                  onToggle={(k) => setRightOpenKey((prev) => (prev === k ? null : k))}
+                  hoveredKey={hoveredRayId?.startsWith('right-') ? hoveredRayId.replace('right-', '') : null}
+                  onHover={(k) => setHoveredRayId(k ? `right-${k}` : null)}
+                />
+              )}
             </div>
           </div>
         </div>
