@@ -29,7 +29,6 @@ import {
   Percent,
   ScanLine,
   BarChart3,
-  Link2,
   Send,
   Inbox,
   Briefcase,
@@ -99,7 +98,7 @@ export const PEOPLE_PILLARS: PillarData[] = [
     items: [
       { icon: Sparkles, label: 'Become a creator', detail: 'Build a following inside SnooSpace', sectionLabel: 'Grow' },
       { icon: Handshake, label: 'Get discovered by sponsors', detail: 'Set your brand preferences and let sponsors find you' },
-      { icon: Link2, label: 'Collabs', detail: 'Partner directly with communities, brands, and venues' },
+      { icon: Handshake, label: 'Collabs', detail: 'Partner directly with communities, brands, and venues' },
       { icon: Megaphone, label: 'Post opportunities', detail: 'Hire help or offer paid gigs of your own' },
       { icon: Eye, label: 'Audience insights', detail: "See who's actually following you" },
       { icon: ClipboardList, label: 'Polls', detail: 'Get quick reads from your audience', sectionLabel: 'Engage' },
@@ -135,7 +134,7 @@ export const COMMUNITY_PILLARS: PillarData[] = [
   },
   {
     key: 'collabs',
-    icon: Link2,
+    icon: Handshake,
     title: 'Collabs',
     accent: 'indigo',
     items: [
@@ -191,7 +190,7 @@ export const BRAND_PILLARS: PillarData[] = [
   },
   {
     key: 'collabs',
-    icon: Link2,
+    icon: Handshake,
     title: 'Collabs',
     accent: 'coral',
     items: [
@@ -227,7 +226,7 @@ export const VENUE_PILLARS: PillarData[] = [
   },
   {
     key: 'collabs',
-    icon: Link2,
+    icon: Handshake,
     title: 'Collabs',
     accent: 'coral',
     items: [
